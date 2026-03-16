@@ -1,0 +1,11 @@
+{# =============================================================
+   Template : CX_interface_groups.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: interface_groups (name, speed)
+   ============================================================= #}
+
+{% for group in (interface_groups or []) %}
+system interface-group {{ group.name }} speed {{ group.speed }}
+{% endfor %}

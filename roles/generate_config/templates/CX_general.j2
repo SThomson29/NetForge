@@ -1,0 +1,30 @@
+{# =============================================================
+   Template : CX_general.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: hostname, profile, timezone, ntp_servers, dns, aruba
+   Note     : Only renders if hostname is explicitly set.
+   ============================================================= #}
+
+{% if hostname | default("") %}
+hostname {{ hostname }}
+profile {{ profile | default("default") }}
+clock timezone {{ timezone | default("UTC") }}
+{% for ntp_server in (ntp_servers or []) %}
+ntp server {{ ntp_server }} minpoll 4 maxpoll 4 iburst
+{% endfor %}
+ntp enable
+spanning-tree
+{% if aruba is defined and aruba.central is defined and aruba.central.disabled | default(false) %}
+no hpe-anw-central
+{% endif %}
+{% if dns is defined %}
+{% if dns.domain_name | default("") %}
+ip dns domain-name {{ dns.domain_name }}
+{% endif %}
+{% for dns_server in (dns.name_servers or []) %}
+ip dns server-address {{ dns_server }}
+{% endfor %}
+{% endif %}
+{% endif %}

@@ -1,0 +1,8 @@
+# Python dependencies for CX-ConfigGen
+# Install with: pip install -r requirements.txt
+
+# Core Ansible - pin to a minimum version to ensure builtin module compatibility
+ansible-core>=2.15
+
+# Ansible linting
+ansible-lint>=6.22

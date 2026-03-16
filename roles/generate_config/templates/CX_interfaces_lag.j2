@@ -1,0 +1,39 @@
+{# =============================================================
+   Template : CX_interfaces_lag.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: lag_interfaces[].name, .description, .admin, .mtu,
+              .lacp_mode, .routed, .ip_address, .ip_prefix, .vrf,
+              .ospf_area, .ospf_process_id,
+              .trunk_allowed_vlans, .trunk_native_vlan, .access_vlan
+   ============================================================= #}
+
+{% for lag in (lag_interfaces or []) %}
+interface {{ lag.name }}
+    description {{ lag.description | default("") }}
+    no shutdown
+    mtu {{ lag.mtu | default(9198) }}
+{% if lag.lacp_mode | default("active") != "off" %}
+    lacp mode {{ lag.lacp_mode | default("active") }}
+{% endif %}
+{% if lag.routed | default(false) %}
+{#  -- Routed (L3) LAG -- #}
+{% if lag.vrf %}
+    vrf attach {{ lag.vrf }}
+{% endif %}
+    ip address {{ lag.ip_address }}/{{ lag.ip_prefix if lag.ip_prefix else 31 }}
+{% if lag.ospf_area %}
+    ip ospf {{ lag.ospf_process_id if lag.ospf_process_id else 1 }} area {{ lag.ospf_area }}
+    ip ospf network point-to-point
+{% endif %}
+{% else %}
+{#  -- Switched (L2) LAG -- #}
+{% if lag.access_vlan | default("") %}
+    vlan access {{ lag.access_vlan }}
+{% else %}
+    vlan trunk native {{ lag.trunk_native_vlan | default(1) }}
+    vlan trunk allowed {{ lag.trunk_allowed_vlans | default("all") }}
+{% endif %}
+{% endif %}
+{% endfor %}

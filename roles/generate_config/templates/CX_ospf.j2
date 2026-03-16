@@ -1,0 +1,28 @@
+{# =============================================================
+   Template : CX_ospf.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: ospf_instances[].enabled, .process_id, .router_id,
+              .vrf, .areas[].area_id
+   Note     : One entry per OSPF instance. Use separate process
+              IDs for each VRF.
+   ============================================================= #}
+
+{% for instance in (ospf_instances or []) %}
+{% if instance.enabled | default(false) %}
+router ospf {{ instance.process_id | default(1) }}
+{% if instance.vrf %}
+    vrf {{ instance.vrf }}
+{% endif %}
+{% if instance.router_id %}
+    router-id {{ instance.router_id }}
+{% endif %}
+{% for area in (instance.areas or []) %}
+    area {{ area.area_id }}
+{% if instance.vrf %}
+    vrf attach {{ instance.vrf }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}

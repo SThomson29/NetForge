@@ -1,0 +1,31 @@
+{# =============================================================
+   Template : CX_vxlan.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: loopback_interface, loopback_ip, ospf_area,
+              vxlan.vni_map[].vni/.vlan
+   Note     : Entire section suppressed if loopback_ip is empty.
+   ============================================================= #}
+
+{% if loopback_ip | default("") %}
+interface {{ loopback_interface | default("loopback1") }}
+    description {{ inventory_hostname }} VTEP Loopback
+    ip address {{ loopback_ip }}/32
+    ip ospf 1 area {{ ospf_area | default("0.0.0.0") }}
+!
+interface vxlan 1
+    source ip {{ loopback_ip }}
+    no shutdown
+    {% for vni in (vxlan.vni_map or []) %}
+    vni {{ vni.vni }} vlan {{ vni.vlan }}
+    {% endfor %}
+!
+evpn
+{% for vni in (vxlan.vni_map or []) %}
+    vlan {{ vni.vlan }}
+        rd auto
+        route-target export auto
+        route-target import auto
+{% endfor %}
+{% endif %}

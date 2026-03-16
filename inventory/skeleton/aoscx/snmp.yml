@@ -1,0 +1,20 @@
+---
+# ============================================================
+# SNMP
+# Template : CX_snmp.j2
+# Variables: snmp.version, snmp.vrf, snmp.system_description,
+#            snmp.location, snmp.contact, snmp.community (v2c),
+#            snmp.v3_users[].username/.auth_password/.priv_password
+# ============================================================
+
+snmp:
+  version: v2c                     # v2c | v3
+  vrf: ""
+  system_description: "Aruba CX Switch"
+  location: ""
+  contact: ""
+  community: ""
+  v3_users: []
+  # - username: snmpv3user
+  #   auth_password: ""
+  #   priv_password: ""

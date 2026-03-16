@@ -1,0 +1,15 @@
+---
+# ============================================================
+# VSF
+# Template : CX_vsf.j2
+# Variables: vsf.enabled, vsf.members[].id,
+#            vsf.interface1, vsf.interface2
+# ============================================================
+
+vsf:
+  enabled: false
+  interface1: ""
+  interface2: ""
+  members: []
+  # - id: 1
+  # - id: 2

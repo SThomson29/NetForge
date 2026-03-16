@@ -1,0 +1,46 @@
+{# =============================================================
+   Template : CX_aaa.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: radius_server_key, radius_group_name,
+              dynamic_authorization, radius_servers[].address/.key
+   Note     : Entire section suppressed if no radius_servers defined.
+   ============================================================= #}
+
+{% if radius_servers | default([]) | length > 0 %}
+radius-server key plaintext {{ radius_server_key }}
+radius-server service-type in-access-request
+!
+{% for server in radius_servers %}
+radius-server host {{ server.address }} key plaintext {{ server.key }}
+{% endfor %}
+aaa authentication allow-fail-through
+!
+aaa group server radius {{ radius_group_name }}
+{% for server in radius_servers %}
+    server {{ server.address }}
+{% endfor %}
+!
+aaa authentication login console group {{ radius_group_name }} local
+aaa authentication login default group {{ radius_group_name }} local
+aaa accounting all-mgmt default start-stop group {{ radius_group_name }}
+aaa accounting port-access start-stop interim 5 group {{ radius_group_name }}
+!
+aaa authentication port-access dot1x authenticator
+    radius server-group {{ radius_group_name }}
+    enable
+!
+aaa authentication port-access mac-auth
+    radius server-group {{ radius_group_name }}
+    enable
+!
+{% if dynamic_authorization | default(false) %}
+radius dyn-authorization enable
+!
+{% for server in radius_servers %}
+radius dyn-authorization server {{ server.address }} key plaintext {{ server.key }}
+{% endfor %}
+!
+{% endif %}
+{% endif %}

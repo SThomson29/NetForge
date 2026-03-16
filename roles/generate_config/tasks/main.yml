@@ -1,0 +1,232 @@
+---
+# generate_config - tasks/main.yml
+# Renders each configuration section template and assembles the final config file.
+#
+# SELECTIVE GENERATION - use --tags to render only specific sections:
+#   ansible-playbook ... --tags vxlan
+#   ansible-playbook ... --tags "bgp,vxlan,vrfs"
+#   ansible-playbook ... --tags routing          # runs bgp, ospf, vrfs
+#   ansible-playbook ... --tags interfaces       # runs all interface types
+#   ansible-playbook ... --tags full             # runs everything (default)
+#
+# When using --tags for partial generation, the output file will be named
+# <hostname>_PARTIAL_<tags>.cfg and will only contain the rendered sections.
+# The 'always' tag ensures the output directory and assembly tasks always run.
+
+- name: Ensure output directory exists
+  ansible.builtin.file:
+    path: "{{ config_output_dir }}"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  tags: always
+
+# --- Individual section tasks ---
+
+- name: Render | StaticRoutes
+  ansible.builtin.template:
+    src: CX_staticroutes.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_01_staticroutes.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, staticroutes]
+
+- name: Render | Management
+  ansible.builtin.template:
+    src: CX_management.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_02_management.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, management]
+
+- name: Render | General
+  ansible.builtin.template:
+    src: CX_general.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_03_general.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, general]
+
+- name: Render | SNMP
+  ansible.builtin.template:
+    src: CX_snmp.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_04_snmp.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, snmp]
+
+- name: Render | AAA
+  ansible.builtin.template:
+    src: CX_aaa.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_05_aaa.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, aaa]
+
+- name: Render | Banner
+  ansible.builtin.template:
+    src: CX_banner.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_06_banner.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, banner]
+
+- name: Render | VRFs
+  ansible.builtin.template:
+    src: CX_vrfs.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_07_vrfs.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, vrfs, routing]
+
+- name: Render | VLANs
+  ansible.builtin.template:
+    src: CX_vlans.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_08_vlans.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, vlans]
+
+- name: Render | Interface Groups
+  ansible.builtin.template:
+    src: CX_interface_groups.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_09_interface_groups.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, interface_groups, interfaces]
+
+- name: Render | Interfaces - Physical
+  ansible.builtin.template:
+    src: CX_interfaces_physical.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_10_interfaces_physical.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, interfaces_physical, interfaces]
+
+- name: Render | Interfaces - LAG
+  ansible.builtin.template:
+    src: CX_interfaces_lag.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_11_interfaces_lag.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, interfaces_lag, interfaces]
+
+- name: Render | Interfaces - Loopback
+  ansible.builtin.template:
+    src: CX_interfaces_loopback.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_12_interfaces_loopback.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, interfaces_loopback, interfaces]
+
+- name: Render | Interfaces - VLAN
+  ansible.builtin.template:
+    src: CX_interfaces_vlan.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_13_interfaces_vlan.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, interfaces_vlan, interfaces]
+
+- name: Render | OSPF
+  ansible.builtin.template:
+    src: CX_ospf.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_14_ospf.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, ospf, routing]
+
+- name: Render | iBGP
+  ansible.builtin.template:
+    src: CX_ibgp.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_15_ibgp.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, ibgp, routing]
+
+- name: Render | VXLAN
+  ansible.builtin.template:
+    src: CX_vxlan.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_16_vxlan.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, vxlan]
+
+- name: Render | VSX
+  ansible.builtin.template:
+    src: CX_vsx.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_17_vsx.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, vsx]
+
+- name: Render | VSF
+  ansible.builtin.template:
+    src: CX_vsf.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_18_vsf.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, vsf]
+
+# --- Assembly ---
+
+- name: Find rendered section files for this host
+  ansible.builtin.find:
+    paths: "{{ config_output_dir }}"
+    patterns: "{{ inventory_hostname }}_[0-9][0-9]_*.ios"
+  register: section_files
+  delegate_to: localhost
+  tags: always
+
+- name: Get size of each section file
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop: "{{ section_files.files }}"
+  register: section_file_stats
+  delegate_to: localhost
+  tags: always
+
+- name: Remove empty section files before assembly
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  loop: "{{ section_file_stats.results }}"
+  when: item.stat.size == 0 or item.stat.size is not defined
+  delegate_to: localhost
+  tags: always
+
+- name: Re-find section files after empty removal
+  ansible.builtin.find:
+    paths: "{{ config_output_dir }}"
+    patterns: "{{ inventory_hostname }}_[0-9][0-9]_*.ios"
+  register: section_files_final
+  delegate_to: localhost
+  tags: always
+
+- name: Set output filename (full vs partial)
+  ansible.builtin.set_fact:
+    assembled_filename: >-
+      {{
+        inventory_hostname + '_FULL.ios'
+        if ansible_run_tags | intersect(['full', 'untagged']) | length > 0
+        else inventory_hostname + '_PARTIAL_' + (ansible_run_tags | sort | join('-')) + '.ios'
+      }}
+  delegate_to: localhost
+  tags: always
+
+- name: Assemble configuration file
+  ansible.builtin.assemble:
+    src: "{{ config_output_dir }}"
+    dest: "{{ config_output_dir }}/{{ assembled_filename }}"
+    regexp: "{{ inventory_hostname }}_[0-9][0-9]_.*\\.ios"
+    delimiter: "\n! --- section break ---\n"
+    mode: "0644"
+  delegate_to: localhost
+  tags: always
+
+- name: Remove section files after assembly
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ section_files_final.files }}"
+  delegate_to: localhost
+  tags: always

@@ -1,0 +1,102 @@
+---
+# ============================================================
+# Interfaces
+# Templates: CX_interface_groups.j2, CX_interfaces_physical.j2,
+#            CX_interfaces_lag.j2, CX_interfaces_loopback.j2,
+#            CX_interfaces_vlan.j2
+# ============================================================
+
+# ------------------------------------------------------------
+# System Interface-Groups
+# Variables: interface_groups[].name, .speed
+# ------------------------------------------------------------
+interface_groups: []
+# - name: 1
+#   speed: 10g                  # 1g | 10g | 25g | 40g | 100g
+
+# ------------------------------------------------------------
+# Physical Interfaces
+# Variables: physical_interfaces[].name, .description, .admin,
+#   .mtu, .lag_member, .routed, .vrf, .ip_address, .ip_prefix,
+#   .ospf.area, .ospf.auth_key, .access_vlan,
+#   .trunk_allowed_vlans, .trunk_native_vlan
+# ------------------------------------------------------------
+physical_interfaces: []
+# - name: 1/1/1
+#   description: ""
+#   admin: up                   # up | down
+#   mtu: 9198
+#   lag_member: ""              # lag name if this port is a LAG member, e.g. lag1
+#   port_type: access           # access | trunk | routed | authenticated
+#   auth_default_vlan: ""       # default/unauth VLAN for authenticated ports
+#   routed: false               # true = L3 routed port
+#   vrf: ""
+#   ip_address: ""
+#   ip_prefix: 31
+#   ospf:
+#     area: "0.0.0.0"
+#     auth_key: ""
+#   access_vlan: ""             # L2 access port
+#   trunk_allowed_vlans: ""     # L2 trunk port
+#   trunk_native_vlan: 1
+
+# ------------------------------------------------------------
+# LAG Interfaces
+# Variables: lag_interfaces[].name, .description, .admin, .mtu,
+#   .lacp_mode, .routed, .vrf, .ip_address, .ip_prefix,
+#   .ospf.area, .ospf.auth_key, .access_vlan,
+#   .trunk_allowed_vlans, .trunk_native_vlan
+#   (member binding driven by physical_interfaces[].lag_member)
+# ------------------------------------------------------------
+lag_interfaces: []
+# - name: lag1
+#   description: ""
+#   admin: up
+#   mtu: 9198
+#   lacp_mode: active           # active | passive | off
+#   routed: false
+#   vrf: ""
+#   ip_address: ""
+#   ip_prefix: 31
+#   ospf:
+#     area: "0.0.0.0"
+#     auth_key: ""
+#   access_vlan: ""
+#   trunk_allowed_vlans: "all"
+#   trunk_native_vlan: 1
+
+# ------------------------------------------------------------
+# Loopback Interfaces
+# Variables: loopback_interfaces[].name, .description, .vrf,
+#            .ip_address, .ip_prefix, .ospf.area
+# ------------------------------------------------------------
+loopback_interfaces: []
+# - name: loopback0
+#   description: "Router ID"
+#   ip_address: ""
+#   ip_prefix: 32
+#   vrf: ""
+#   ospf_area: "0.0.0.0"       # populate to enable OSPF on this loopback
+#   ospf_process_id: 1
+
+# ------------------------------------------------------------
+# VLAN Interfaces (SVIs)
+# Variables: vlan_interfaces[].name, .description, .admin, .vrf,
+#   .ip_address, .ip_prefix, .helper_addresses[], .ospf_area,
+#   .ospf_passive, .active_gateway_ip, .active_gateway_mac,
+#   .mtu_jumbo
+# ------------------------------------------------------------
+vlan_interfaces: []
+# - name: vlan100
+#   description: ""
+#   admin: up
+#   vrf: ""
+#   ip_address: ""
+#   ip_prefix: 24
+#   helper_addresses: []
+#   ospf_area: ""
+#   ospf_process_id: 1
+#   ospf_passive: false
+#   active_gateway_ip: ""       # VSX active-gateway IP
+#   active_gateway_mac: "00:02:00:00:00:01"      # VSX active-gateway MAC
+#   mtu_jumbo: false

@@ -1,0 +1,43 @@
+---
+# ============================================================
+# Routing - OSPF & iBGP/EVPN
+# Templates: CX_ospf.j2, CX_ibgp.j2
+# ============================================================
+
+# ------------------------------------------------------------
+# OSPF instances
+# One entry per OSPF process. Use a separate process ID and
+# router ID for each VRF instance. vrf is optional — leave
+# empty to run in the default VRF.
+# Variables: ospf_instances[].enabled, .process_id, .router_id,
+#            .vrf, .areas[].area_id
+# Also referenced by interface templates as ospf_instances[0].process_id
+# ------------------------------------------------------------
+ospf_instances: []
+# - enabled: true
+#   process_id: 1
+#   router_id: ""
+#   vrf: ""
+#   areas:
+#     - area_id: "0.0.0.0"
+# - enabled: true
+#   process_id: 2
+#   router_id: ""
+#   vrf: "TENANT_A"
+#   areas:
+#     - area_id: "0.0.0.1"
+
+# ------------------------------------------------------------
+# iBGP / EVPN
+# Variables: device_role, bgp.asn, bgp.router_id,
+#            bgp.neighbors[].ip, .remote_asn, .update_source
+# ------------------------------------------------------------
+device_role: ""                    # route_reflector | route_reflector_client
+
+bgp:
+  asn: ""
+  router_id: ""
+  neighbors: []
+  # - ip: ""
+  #   remote_asn: 65000
+  #   update_source: loopback0

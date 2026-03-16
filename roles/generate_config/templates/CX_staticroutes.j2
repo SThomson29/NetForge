@@ -1,0 +1,12 @@
+{# =============================================================
+   Template : CX_staticroutes.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: static_routes (prefix, gateway, vrf, distance,
+              distance)
+   ============================================================= #}
+
+{% for route in (static_routes or []) %}
+ip route {{ route.prefix }} {{ route.gateway }} {% if route.vrf | default("") %} vrf {{ route.vrf }}{% endif %}{% if route.distance | default("") %} {{ route.distance }}{% endif %}
+{% endfor %}

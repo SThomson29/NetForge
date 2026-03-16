@@ -1,0 +1,12 @@
+---
+# ============================================================
+# Static Routes
+# Template : CX_staticroutes.j2
+# Variables: static_routes[].prefix, .gateway, .vrf, .distance
+# ============================================================
+
+static_routes: []
+# - prefix: 0.0.0.0/0
+#   gateway: 192.168.0.254
+#   vrf: ""
+#   distance: ""

@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: generate_config
+  author: Sam Thomson
+  description: Generates switch configuration files from host_vars using Jinja2 templates
+  min_ansible_version: "2.12"
+dependencies: []

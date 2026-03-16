@@ -1,0 +1,22 @@
+{# =============================================================
+   Template : CX_interfaces_loopback.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: loopback_interfaces[].name, .description,
+              .ip_address, .vrf, .ospf_area, .ospf_process_id
+   ============================================================= #}
+
+{% for loopback in (loopback_interfaces or []) %}
+interface {{ loopback.name if loopback.name else 'loopback0' }}
+{% if loopback.description | default("") %}
+    description {{ loopback.description }}
+{% endif %}
+{% if loopback.vrf %}
+    vrf attach {{ loopback.vrf }}
+{% endif %}
+    ip address {{ loopback.ip_address }}/32
+{% if loopback.ospf_area %}
+    ip ospf {{ loopback.ospf_process_id if loopback.ospf_process_id else 1 }} area {{ loopback.ospf_area }}
+{% endif %}
+{% endfor %}

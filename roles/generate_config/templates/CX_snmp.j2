@@ -1,0 +1,26 @@
+{# =============================================================
+   Template : CX_snmp.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: snmp.version, .vrf, .system_description, .location,
+              .contact, .community, .v3_users[]
+   Note     : Only renders if snmp.community (v2c) or
+              snmp.v3_users (v3) are populated.
+   ============================================================= #}
+
+{% if snmp.version | default("") == "v2c" and snmp.community | default("") %}
+snmp-server vrf {{ snmp.vrf if snmp.vrf else "default" }}
+snmp-server system-description {{ snmp.system_description | default("") }}
+snmp-server system-location {{ snmp.location | default("") }}
+snmp-server system-contact {{ snmp.contact | default("") }}
+snmp-server community {{ snmp.community }}
+{% elif snmp.version | default("") == "v3" and snmp.v3_users | default([]) | length > 0 %}
+snmp-server vrf {{ snmp.vrf if snmp.vrf else "default" }}
+snmp-server system-description {{ snmp.system_description | default("") }}
+snmp-server system-location {{ snmp.location | default("") }}
+snmp-server system-contact {{ snmp.contact | default("") }}
+{% for user in snmp.v3_users %}
+snmpv3 user {{ user.username }} auth sha auth-pass plaintext {{ user.auth_password }} priv aes priv-pass plaintext {{ user.priv_password }}
+{% endfor %}
+{% endif %}

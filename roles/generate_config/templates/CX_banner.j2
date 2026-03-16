@@ -1,0 +1,18 @@
+{# =============================================================
+   Template : CX_banner.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: banner.motd, banner.exec
+   ============================================================= #}
+
+{% if banner is defined %}
+{% if banner.motd | default("") %}
+banner motd !
+{{ banner.motd }}!
+{% endif %}
+{% if banner.exec | default("") %}
+banner exec !
+{{ banner.exec }}!
+{% endif %}
+{% endif %}

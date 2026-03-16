@@ -1,0 +1,15 @@
+---
+# ============================================================
+# AAA
+# Template : CX_aaa.j2
+# Variables: radius_server_key, radius_group_name,
+#            dynamic_authorization, radius_servers[].address/.key
+# ============================================================
+
+radius_server_key: ""              # global fallback RADIUS key
+radius_group_name: RADIUS_GROUP
+dynamic_authorization: false
+
+radius_servers: []
+# - address: 192.0.2.10
+#   key: ""

@@ -1,0 +1,23 @@
+{# =============================================================
+   Template : CX_management.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: local_users, management.vrf, management.source_interface
+   Note     : Only renders if local_users are defined or
+              management.vrf/source_interface are explicitly set.
+   ============================================================= #}
+
+{% set has_users = local_users | default([]) | length > 0 %}
+{% set has_vrf = management.vrf | default("") %}
+{% set has_src = management.source_interface | default("") %}
+{% if has_users or has_vrf or has_src %}
+{% for user in (local_users or []) %}
+user {{ user.username }} group {{ user.group | default("administrators") }} password plaintext {{ user.password }}
+{% endfor %}
+ssh server vrf {{ management.vrf if management.vrf else "default" }}
+https server vrf {{ management.vrf if management.vrf else "default" }}
+{% if management.source_interface | default("") %}
+ip source interface all interface {{ management.source_interface }}
+{% endif %}
+{% endif %}

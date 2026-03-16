@@ -1,0 +1,17 @@
+{# =============================================================
+   Template : CX_vsf.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: vsf.enabled, vsf.members[].id,
+              vsf.interface1, vsf.interface2
+   ============================================================= #}
+
+{% if vsf is defined and vsf.enabled | default(false) %}
+{% for member in vsf.members %}
+vsf member {{ member.id }}
+    vsf member {{ member.id }} link 1 {{ vsf.interface1 }}
+    vsf member {{ member.id }} link 2 {{ vsf.interface2 }}
+{% endfor %}
+vsf secondary-member 2
+{% endif %}

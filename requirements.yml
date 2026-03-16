@@ -1,0 +1,13 @@
+---
+# Ansible Galaxy requirements for CX-ConfigGen
+# Install with: ansible-galaxy install -r requirements.yml
+#
+# No external collections are currently required — all modules used are
+# ansible.builtin. Add entries here if you introduce community or
+# vendor-specific collections in future templates.
+
+collections: []
+# - name: community.general
+#   version: ">=8.0"
+# - name: arubanetworks.aoscx
+#   version: ">=4.0"

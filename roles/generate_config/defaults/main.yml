@@ -1,0 +1,49 @@
+---
+# Role defaults - generate_config
+# These are the lowest-priority defaults and can be overridden in host_vars.
+
+config_output_dir: ./generated_configs
+config_file_extension: ".ios"
+
+# Sensible platform defaults
+default_mtu: 9198
+default_admin_state: up
+default_lacp_mode: active
+default_ospf_cost: 10
+default_bgp_keepalive: 3
+default_bgp_holdtime: 9
+
+# Safe fallback defaults for variables referenced directly in templates.
+# These ensure the playbook never errors on an undefined variable when a
+# host_vars file is absent or a feature is not in use.
+vxlan:
+  vni_map: []
+vsf:
+  enabled: false
+  members: []
+  interface1: ""
+  interface2: ""
+vsx:
+  enabled: false
+ospf_instances: []
+bgp:
+  asn: ""
+  router_id: ""
+  neighbors: []
+device_role: ""
+loopback_interface: loopback1
+loopback_ip: ""
+ospf_area: "0.0.0.0"
+static_routes: []
+vlans: []
+vrfs: []
+physical_interfaces: []
+lag_interfaces: []
+loopback_interfaces: []
+vlan_interfaces: []
+interface_groups: []
+local_users: []
+radius_servers: []
+radius_server_key: ""
+radius_group_name: ""
+dynamic_authorization: false

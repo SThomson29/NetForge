@@ -1,0 +1,19 @@
+---
+# ============================================================
+# VSX
+# Template : CX_vsx.j2
+# Variables: vsx.enabled, .isl_port, .role, .system_mac,
+#            .keepalive.peer_ip, .keepalive.src_ip,
+#            .keepalive.vrf, .peer_ip
+# ============================================================
+
+vsx:
+  enabled: false
+  role: primary                    # primary | secondary
+  system_mac: ""
+  isl_port: lag256
+  keepalive:
+    peer_ip: ""
+    src_ip: ""
+    vrf: ""
+  peer_ip: ""

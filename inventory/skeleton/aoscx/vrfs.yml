@@ -1,0 +1,12 @@
+---
+# ============================================================
+# VRFs
+# Template : CX_vrfs.j2
+# Variables: vrfs[].name
+# Note: leave vrf fields on interfaces/routing empty to keep
+#       those features in the default VRF.
+# ============================================================
+ 
+vrfs: []
+# - name: mgmt
+# - name: TENANT_A

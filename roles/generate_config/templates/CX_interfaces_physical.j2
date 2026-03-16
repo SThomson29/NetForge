@@ -1,0 +1,79 @@
+{# =============================================================
+   Template : CX_interfaces_physical.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: physical_interfaces[].name, .description, .admin,
+              .mtu, .lag_member, .routed, .ip_address, .ip_prefix,
+              .vrf, .ospf_area, .ospf_process_id,
+              .access_vlan, .trunk_allowed_vlans, .trunk_native_vlan,
+              .port_type (access|trunk|routed|authenticated)
+              .auth_default_vlan (authenticated ports only)
+   ============================================================= #}
+
+{% set vlan_id_list = vlans | default([]) | map(attribute='id') | list %}
+
+{% for intf in (physical_interfaces or []) %}
+{% set is_routed = (intf.port_type | default('access') == 'routed') or (intf.routed | default(false)) %}
+{% set is_auth = intf.port_type | default('access') == 'authenticated' %}
+interface {{ intf.name }}
+    description {{ intf.description | default("") }}
+{% if intf.admin | default("up") == "up" %}
+    no shutdown
+{% else %}
+    shutdown
+{% endif %}
+    mtu {{ intf.mtu | default(9198) }}
+{% if intf.lag_member | default("") %}
+    lag {{ intf.lag_member }}
+{% elif is_routed %}
+{#  -- Routed (L3) port -- #}
+{% if intf.vrf %}
+    vrf attach {{ intf.vrf }}
+{% endif %}
+    ip address {{ intf.ip_address }}/{{ intf.ip_prefix if intf.ip_prefix else 31 }}
+{% if intf.ospf_area %}
+    ip ospf {{ intf.ospf_process_id if intf.ospf_process_id else 1 }} area {{ intf.ospf_area }}
+    ip ospf network point-to-point
+{% endif %}
+{% elif is_auth %}
+{#  -- Authenticated port -- #}
+    no routing
+    vlan access {{ intf.auth_default_vlan | default("1") }}
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+    spanning-tree root-guard
+    spanning-tree tcn-guard
+    loop-protect
+{% if vlan_id_list %}
+    loop-protect vlan 1,{{ vlan_id_list | join(",") }}
+{% else %}
+    loop-protect vlan 1
+{% endif %}
+    loop-protect action tx-rx-disable
+    port-access fallback-role Unauth
+    port-access onboarding-method concurrent enable
+    aaa authentication port-access allow-cdp-bpdu
+    aaa authentication port-access allow-lldp-bpdu
+    aaa authentication port-access client-limit 25
+    port-access allow-flood-traffic enable
+    aaa authentication port-access dot1x authenticator
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+    aaa authentication port-access mac-auth
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+{% else %}
+{#  -- Switched (L2) port -- #}
+{% if intf.access_vlan | default("") %}
+    vlan access {{ intf.access_vlan }}
+{% elif intf.trunk_allowed_vlans | default("") %}
+    vlan trunk native {{ intf.trunk_native_vlan | default(1) }}
+    vlan trunk allowed {{ intf.trunk_allowed_vlans }}
+{% endif %}
+{% endif %}
+{% endfor %}

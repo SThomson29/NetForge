@@ -1,0 +1,42 @@
+{# =============================================================
+   Template : CX_bgp.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: bgp (enabled, asn, router_id, vrf, neighbors,
+              address_families, redistribute)
+   ============================================================= #}
+
+# iBGP for EVPN control plane - Route Reflector
+{% if device_role | default("") == "route_reflector" %}
+router bgp {{ bgp.asn }}
+    bgp router-id {{ bgp.router_id }}
+    {% for neighbor in (bgp.neighbors or []) %}
+    neighbor {{ neighbor.ip }} remote-as {{ neighbor.remote_asn }}
+    neighbor {{ neighbor.ip }} update-source {{ neighbor.update_source | default("loopback0") }}
+    {% endfor %}
+    address-family l2vpn evpn
+        {% for neighbor in (bgp.neighbors or []) %}
+        neighbor {{ neighbor.ip }} route-reflector-client
+        neighbor {{ neighbor.ip }} send-community extended
+        neighbor {{ neighbor.ip }} activate
+        {% endfor %}
+    exit-address-family
+{% endif %}
+
+# iBGP for EVPN control plane - Route Reflector Client
+{% if device_role | default("") == "route_reflector_client" %}
+router bgp {{ bgp.asn }}
+    bgp router-id {{ bgp.router_id }}
+    {% for neighbor in (bgp.neighbors or []) %}
+    neighbor {{ neighbor.ip }} remote-as {{ neighbor.remote_asn }}
+    neighbor {{ neighbor.ip }} update-source {{ neighbor.update_source | default("loopback0") }}
+    {% endfor %}
+    address-family l2vpn evpn
+        {% for neighbor in (bgp.neighbors or []) %}
+        neighbor {{ neighbor.ip }} send-community extended
+        neighbor {{ neighbor.ip }} activate
+        {% endfor %}
+    exit-address-family
+{% endif %}
+

@@ -1,0 +1,11 @@
+{# =============================================================
+   Template : CX_vrfs.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: vrfs (name, rd, description)
+   ============================================================= #}
+
+{% for vrf in (vrfs or []) %}
+vrf {{ vrf.name }}
+{% endfor %}

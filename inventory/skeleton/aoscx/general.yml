@@ -1,0 +1,26 @@
+---
+# ============================================================
+# General / System
+# Template : CX_general.j2
+# Variables: hostname, platform, profile, config_output_dir,
+#            timezone, ntp_servers, aruba, dns
+# ============================================================
+ 
+hostname: __HOSTNAME__
+platform: aoscx
+profile: default
+config_output_dir: ./generated_configs
+ 
+timezone: ""
+ 
+ntp_servers: []
+# - 192.0.2.1
+ 
+aruba:
+  central:
+    disabled: false
+ 
+dns:
+  domain_name: ""
+  name_servers: []
+  # - 8.8.8.8

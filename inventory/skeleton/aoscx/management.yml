@@ -1,0 +1,18 @@
+---
+# ============================================================
+# Management
+# Template : CX_management.j2
+# Variables: management.vrf, management.source_interface,
+#            local_users[].username/.group/.password
+# Note: password vault variable is derived from the username,
+#       e.g. user 'admin' uses {{ vault_password_admin }}
+# ============================================================
+
+management:
+  vrf: ""
+  source_interface: ""
+
+local_users: []
+# - username: admin
+#   group: administrators
+#   password: ""

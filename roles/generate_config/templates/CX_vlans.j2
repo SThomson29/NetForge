@@ -1,0 +1,12 @@
+{# =============================================================
+   Template : CX_vlans.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: vlans (id, name, state)
+   ============================================================= #}
+
+{% for vlan in (vlans or []) %}
+vlan {{ vlan.id }}
+    name {{ vlan.name | default("") }}
+{% endfor %}

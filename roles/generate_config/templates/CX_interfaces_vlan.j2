@@ -1,0 +1,48 @@
+{# =============================================================
+   Template : CX_interfaces_vlan.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: vlan_interfaces (name, description, ip_address,
+              ip_prefix, vrf, admin, helper_addresses,
+              active_gateway_ip, active_gateway_mac,
+              ospf_area, ospf_passive, mtu_jumbo)
+   ============================================================= #}
+
+{% for intf in (vlan_interfaces or []) %}
+interface {{ intf.name }}
+{% if intf.description | default("") %}
+    description {{ intf.description }}
+{% endif %}
+{% if intf.admin | default("up") == "up" %}
+    no shutdown
+{% else %}
+    shutdown
+{% endif %}
+{% if intf.vrf | default("") %}
+    vrf attach {{ intf.vrf }}
+{% endif %}
+{% if intf.ip_address | default("") %}
+    ip address {{ intf.ip_address }}/{{ intf.ip_prefix }}
+{% endif %}
+{% for helper in (intf.helper_addresses or []) %}
+    ip helper-address {{ helper }}
+{% endfor %}
+{% if intf.ospf_area %}
+    ip ospf {{ intf.ospf_process_id if intf.ospf_process_id else 1 }} area {{ intf.ospf_area }}
+{% if intf.ospf_passive | default(false) %}
+    ip ospf passive
+{% endif %}
+{% endif %}
+{% if vsx is defined and vsx.enabled | default(false) %}
+{% if intf.active_gateway_mac | default("") %}
+    active-gateway ip mac {{ intf.active_gateway_mac }}
+{% endif %}
+{% if intf.active_gateway_ip | default("") %}
+    active-gateway ip {{ intf.active_gateway_ip }}
+{% endif %}
+{% endif %}
+{% if intf.mtu_jumbo | default(false) %}
+    mtu 9198
+{% endif %}
+{% endfor %}

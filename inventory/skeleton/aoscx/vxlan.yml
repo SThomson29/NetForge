@@ -1,0 +1,19 @@
+---
+# ============================================================
+# VXLAN
+# Template : CX_vxlan.j2
+# Variables: loopback_interface, loopback_ip, ospf_area
+#            (flat vars for VTEP loopback config),
+#            vxlan.vni_map[].vni, .vlan
+# Note: template renders unconditionally - leave loopback_ip
+#       empty to suppress VTEP config until ready to populate.
+# ============================================================
+
+loopback_interface: loopback1      # VTEP loopback interface name
+loopback_ip: ""                    # VTEP source IP
+ospf_area: "0.0.0.0"              # OSPF area for VTEP loopback
+
+vxlan:
+  vni_map: []
+  # - vni: 10100
+  #   vlan: 100

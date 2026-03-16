@@ -1,0 +1,17 @@
+---
+# playbooks/generate_configs.yml
+# Generates switch configuration files.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/generate_configs.yml
+#   ansible-playbook -i inventory/hosts.ini playbooks/generate_configs.yml --limit cx_vsx
+#   ansible-playbook -i inventory/hosts.ini playbooks/generate_configs.yml --limit CP-CORE-01
+#   ansible-playbook -i inventory/hosts.ini playbooks/generate_configs.yml -e config_output_dir=/tmp/configs
+
+- name: Generate switch configurations
+  hosts: all
+  gather_facts: false
+  connection: local
+
+  roles:
+    - role: generate_config

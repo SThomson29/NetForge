@@ -1,0 +1,17 @@
+{# =============================================================
+   Template : CX_vsx.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: vsx (enabled, isl_port, role, system_mac,
+              keepalive.peer_ip, keepalive.src_ip,
+              keepalive.vrf, peer_ip)
+   ============================================================= #}
+
+{% if vsx is defined and vsx.enabled | default(false) %}
+vsx
+    inter-switch-link {{ vsx.isl_port }}
+    role {{ vsx.role | default("primary") }}
+    keepalive peer {{ vsx.keepalive.peer_ip }} source {{ vsx.keepalive.src_ip }} vrf {{ vsx.keepalive.vrf | default("mgmt") }}
+    system-mac {{ vsx.system_mac }}
+{% endif %}

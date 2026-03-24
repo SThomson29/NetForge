@@ -1,7 +1,0 @@
-vlans:
-  - id: 100
-    name: App-Tier
-  - id: 200
-    name: DB-Tier
-  - id: 300
-    name: Mgmt

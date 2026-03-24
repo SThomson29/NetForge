@@ -1,0 +1,121 @@
+
+
+! --- section break ---
+
+ssh server vrf default
+https server vrf default
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname core-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+ip dns domain-name lab.local
+ip dns server-address 10.0.0.53
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf PROD
+vrf MGMT
+
+! --- section break ---
+
+vlan 100
+    name Prod
+vlan 200
+    name Mgmt
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description P2P to core-02 area 0
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.0/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+interface 1/1/2
+    description P2P to dist in area 1
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.2/31
+    ip ospf 1 area 0.0.0.1
+    ip ospf network point-to-point
+interface 1/1/3
+    description P2P in PROD VRF OSPF
+    no shutdown
+    mtu 9198
+    vrf attach PROD
+    ip address 10.254.1.0/31
+    ip ospf 2 area 0.0.0.0
+    ip ospf network point-to-point
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    description Global router ID
+    ip address 10.255.0.1/32
+    ip ospf 1 area 0.0.0.0
+interface loopback1
+    description PROD VRF router ID
+    vrf attach PROD
+    ip address 10.255.1.1/32
+    ip ospf 2 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan100
+    description Prod SVI - OSPF passive
+    no shutdown
+    vrf attach PROD
+    ip address 10.100.0.1/24
+    ip ospf 2 area 0.0.0.0
+    ip ospf passive
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.1
+    area 0.0.0.0
+    area 0.0.0.1
+router ospf 2
+    vrf PROD
+    router-id 10.255.1.1
+    area 0.0.0.0
+    vrf attach PROD
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

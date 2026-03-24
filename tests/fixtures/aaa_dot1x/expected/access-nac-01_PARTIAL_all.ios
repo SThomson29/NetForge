@@ -1,0 +1,178 @@
+
+
+! --- section break ---
+
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname access-nac-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+ip dns domain-name corp.local
+ip dns server-address 10.0.0.53
+
+! --- section break ---
+
+
+! --- section break ---
+
+radius-server key plaintext globalradiuskey
+radius-server service-type in-access-request
+!
+radius-server host 10.0.0.100 key plaintext server1key
+radius-server host 10.0.0.101 key plaintext server2key
+aaa authentication allow-fail-through
+!
+aaa group server radius CORP_RADIUS
+    server 10.0.0.100
+    server 10.0.0.101
+!
+aaa authentication login console group CORP_RADIUS local
+aaa authentication login default group CORP_RADIUS local
+aaa accounting all-mgmt default start-stop group CORP_RADIUS
+aaa accounting port-access start-stop interim 5 group CORP_RADIUS
+!
+aaa authentication port-access dot1x authenticator
+    radius server-group CORP_RADIUS
+    enable
+!
+aaa authentication port-access mac-auth
+    radius server-group CORP_RADIUS
+    enable
+!
+radius dyn-authorization enable
+!
+radius dyn-authorization server 10.0.0.100 key plaintext server1key
+radius dyn-authorization server 10.0.0.101 key plaintext server2key
+!
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf mgmt
+
+! --- section break ---
+
+vlan 10
+    name Corp-Users
+vlan 20
+    name Printers
+vlan 99
+    name Auth-Fail
+vlan 100
+    name Guest
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description NAC authenticated port
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 99
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+    spanning-tree root-guard
+    spanning-tree tcn-guard
+    loop-protect
+    loop-protect vlan 1,10,20,99,100
+    loop-protect action tx-rx-disable
+    port-access fallback-role Unauth
+    port-access onboarding-method concurrent enable
+    aaa authentication port-access allow-cdp-bpdu
+    aaa authentication port-access allow-lldp-bpdu
+    aaa authentication port-access client-limit 25
+    port-access allow-flood-traffic enable
+    aaa authentication port-access dot1x authenticator
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+    aaa authentication port-access mac-auth
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+interface 1/1/2
+    description Another authenticated port
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 99
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+    spanning-tree root-guard
+    spanning-tree tcn-guard
+    loop-protect
+    loop-protect vlan 1,10,20,99,100
+    loop-protect action tx-rx-disable
+    port-access fallback-role Unauth
+    port-access onboarding-method concurrent enable
+    aaa authentication port-access allow-cdp-bpdu
+    aaa authentication port-access allow-lldp-bpdu
+    aaa authentication port-access client-limit 25
+    port-access allow-flood-traffic enable
+    aaa authentication port-access dot1x authenticator
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+    aaa authentication port-access mac-auth
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+interface 1/1/48
+    description Trunk uplink
+    no shutdown
+    mtu 9198
+    vlan trunk native 1
+    vlan trunk allowed 10,20,99,100
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    description Mgmt loopback
+    ip address 10.255.3.1/32
+
+! --- section break ---
+
+interface vlan10
+    description Corp Users SVI
+    no shutdown
+    ip address 10.10.0.10/24
+    ip helper-address 10.0.0.67
+
+! --- section break ---
+
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

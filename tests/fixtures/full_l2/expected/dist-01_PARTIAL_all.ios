@@ -1,0 +1,167 @@
+
+
+! --- section break ---
+
+user admin group administrators password plaintext AES256:abc123hash
+user readonly group operators password plaintext AES256:def456hash
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname dist-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp server 10.0.0.124 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+no hpe-anw-central
+ip dns domain-name corp.local
+ip dns server-address 10.0.0.53
+ip dns server-address 10.0.0.54
+
+! --- section break ---
+
+snmp-server vrf mgmt
+snmp-server system-description Distribution Switch
+snmp-server system-location Server Room A
+snmp-server system-contact noc@corp.local
+snmp-server community public123
+
+! --- section break ---
+
+
+! --- section break ---
+
+banner motd !
+WARNING: Authorised access only. All activity monitored.!
+banner exec !
+Welcome to dist-01!
+
+! --- section break ---
+
+vrf mgmt
+vrf PROD
+vrf GUEST
+
+! --- section break ---
+
+vlan 10
+    name Management
+vlan 20
+    name Production
+vlan 30
+    name Guest
+vlan 40
+    name Voice
+vlan 99
+    name Native
+vlan 100
+    name Server
+
+! --- section break ---
+
+system interface-group 1Gig_access speed 1g
+system interface-group 10Gig_uplinks speed 10g
+
+! --- section break ---
+
+
+interface 1/1/1
+    description Workstation access
+    no shutdown
+    mtu 1500
+    vlan access 20
+interface 1/1/2
+    description VoIP phone
+    no shutdown
+    mtu 1500
+    vlan access 40
+interface 1/1/3
+    description Trunk to access switch
+    no shutdown
+    mtu 9198
+    vlan trunk native 99
+    vlan trunk allowed 10,20,30,40,99
+interface 1/1/4
+    description Guest wireless AP
+    no shutdown
+    mtu 1500
+    vlan trunk native 1
+    vlan trunk allowed 30
+interface 1/1/5
+    description Admin down port
+    shutdown
+    mtu 9198
+    vlan access 10
+interface 1/1/48
+    description LAG member uplink
+    no shutdown
+    mtu 9198
+    lag lag1
+
+! --- section break ---
+
+interface lag1
+    description Uplink to core
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 99
+    vlan trunk allowed all
+
+! --- section break ---
+
+interface loopback0
+    description Management loopback
+    ip address 10.255.1.1/32
+
+! --- section break ---
+
+interface vlan10
+    description Management SVI
+    no shutdown
+    vrf attach mgmt
+    ip address 10.10.0.1/24
+    ip helper-address 10.0.0.67
+interface vlan20
+    description Production SVI
+    no shutdown
+    vrf attach PROD
+    ip address 10.20.0.1/24
+    ip helper-address 10.0.0.67
+    ip helper-address 10.0.0.68
+interface vlan30
+    description Guest SVI
+    no shutdown
+    vrf attach GUEST
+    ip address 10.30.0.1/24
+interface vlan100
+    description Server SVI jumbo
+    no shutdown
+    vrf attach PROD
+    ip address 10.100.0.1/24
+    ip helper-address 10.0.0.67
+    ip ospf 1 area 0.0.0.0
+    mtu 9198
+
+! --- section break ---
+
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

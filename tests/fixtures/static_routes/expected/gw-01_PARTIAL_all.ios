@@ -1,0 +1,76 @@
+
+ip route 0.0.0.0/0 10.254.0.1 ip route 192.168.0.0/16 10.254.0.3  10ip route 172.16.0.0/12 10.254.0.5  vrf PRODip route 10.200.0.0/16 10.254.1.1  vrf PROD 200ip route 0.0.0.0/0 10.10.0.254  vrf MGMT
+
+! --- section break ---
+
+ssh server vrf default
+https server vrf default
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname gw-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf PROD
+vrf MGMT
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description WAN uplink
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.0/31
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    ip address 10.255.4.1/32
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

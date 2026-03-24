@@ -1,0 +1,128 @@
+
+
+! --- section break ---
+
+ssh server vrf default
+https server vrf default
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname leaf-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vlan 100
+    name App-Tier
+vlan 200
+    name DB-Tier
+vlan 300
+    name Mgmt
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description P2P to spine-01
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.1/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+interface 1/1/2
+    description P2P to spine-02
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.3/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    description Router ID
+    ip address 10.255.0.10/32
+    ip ospf 1 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan100
+    description App-Tier SVI
+    no shutdown
+    ip address 10.100.0.1/24
+    mtu 9198
+interface vlan200
+    description DB-Tier SVI
+    no shutdown
+    ip address 10.200.0.1/24
+    mtu 9198
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.10
+    area 0.0.0.0
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+interface loopback1
+    description leaf-01 VTEP Loopback
+    ip address 10.253.0.10/32
+    ip ospf 1 area 0.0.0.0
+!
+interface vxlan 1
+    source ip 10.253.0.10
+    no shutdown
+        vni 10100 vlan 100
+        vni 10200 vlan 200
+        vni 10300 vlan 300
+    !
+evpn
+    vlan 100
+        rd auto
+        route-target export auto
+        route-target import auto
+    vlan 200
+        rd auto
+        route-target export auto
+        route-target import auto
+    vlan 300
+        rd auto
+        route-target export auto
+        route-target import auto
+
+! --- section break ---
+
+
+! --- section break ---
+

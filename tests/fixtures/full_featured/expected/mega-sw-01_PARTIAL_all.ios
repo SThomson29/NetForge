@@ -1,0 +1,327 @@
+
+ip route 0.0.0.0/0 10.254.0.1 ip route 192.168.0.0/16 10.254.0.1  vrf PROD 10ip route 0.0.0.0/0 10.10.0.254  vrf mgmt
+
+! --- section break ---
+
+user admin group administrators password plaintext AES256:adminpass
+user netops group operators password plaintext AES256:netopspass
+user readonly group auditors password plaintext AES256:readonlypass
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname mega-sw-01
+profile default
+clock timezone America/New_York
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp server 10.0.0.124 minpoll 4 maxpoll 4 iburst
+ntp server ntp.corp.local minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+no hpe-anw-central
+ip dns domain-name mega.corp.local
+ip dns server-address 10.0.0.53
+ip dns server-address 10.0.0.54
+
+! --- section break ---
+
+snmp-server vrf mgmt
+snmp-server system-description Mega Featured Switch
+snmp-server system-location DC1-Row3-Rack5
+snmp-server system-contact noc@mega.corp.local
+snmpv3 user snmpv3admin auth sha auth-pass plaintext authpassword1 priv aes priv-pass plaintext privpassword1
+snmpv3 user snmpv3monitor auth sha auth-pass plaintext authpassword2 priv aes priv-pass plaintext privpassword2
+
+! --- section break ---
+
+radius-server key plaintext globalradiuskey123
+radius-server service-type in-access-request
+!
+radius-server host 10.0.0.100 key plaintext radiuskey1
+radius-server host 10.0.0.101 key plaintext radiuskey2
+radius-server host 10.0.0.102 key plaintext radiuskey3
+aaa authentication allow-fail-through
+!
+aaa group server radius CORP_RADIUS_GROUP
+    server 10.0.0.100
+    server 10.0.0.101
+    server 10.0.0.102
+!
+aaa authentication login console group CORP_RADIUS_GROUP local
+aaa authentication login default group CORP_RADIUS_GROUP local
+aaa accounting all-mgmt default start-stop group CORP_RADIUS_GROUP
+aaa accounting port-access start-stop interim 5 group CORP_RADIUS_GROUP
+!
+aaa authentication port-access dot1x authenticator
+    radius server-group CORP_RADIUS_GROUP
+    enable
+!
+aaa authentication port-access mac-auth
+    radius server-group CORP_RADIUS_GROUP
+    enable
+!
+radius dyn-authorization enable
+!
+radius dyn-authorization server 10.0.0.100 key plaintext radiuskey1
+radius dyn-authorization server 10.0.0.101 key plaintext radiuskey2
+radius dyn-authorization server 10.0.0.102 key plaintext radiuskey3
+!
+
+! --- section break ---
+
+banner motd !
+AUTHORISED ACCESS ONLY - All activity is monitored and logged!
+banner exec !
+Welcome to mega-sw-01 | Change control required!
+
+! --- section break ---
+
+vrf mgmt
+vrf PROD
+vrf GUEST
+vrf VOICE
+
+! --- section break ---
+
+vlan 10
+    name Management
+vlan 20
+    name Production
+vlan 30
+    name Guest
+vlan 40
+    name Voice
+vlan 50
+    name Servers
+vlan 99
+    name Auth-Default
+vlan 100
+    name Storage
+vlan 999
+    name Native
+
+! --- section break ---
+
+system interface-group 10Gig speed 10g
+system interface-group 25Gig speed 25g
+
+! --- section break ---
+
+
+interface 1/1/1
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+interface 1/1/2
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+interface 1/1/3
+    description Uplink LAG member
+    no shutdown
+    mtu 9198
+    lag lag1
+interface 1/1/4
+    description Uplink LAG member
+    no shutdown
+    mtu 9198
+    lag lag1
+interface 1/1/5
+    description L3 routed to firewall
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.0/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+interface 1/1/6
+    description L3 routed PROD VRF
+    no shutdown
+    mtu 9198
+    vrf attach PROD
+    ip address 10.254.1.0/31
+    ip ospf 2 area 0.0.0.0
+    ip ospf network point-to-point
+interface 1/1/10
+    description Trunk to access
+    no shutdown
+    mtu 9198
+    vlan trunk native 999
+    vlan trunk allowed 10,20,30,40,99
+interface 1/1/11
+    description Access port prod
+    no shutdown
+    mtu 9198
+    vlan access 20
+interface 1/1/12
+    description NAC authenticated port
+    no shutdown
+    mtu 9198
+    no routing
+    vlan access 99
+    spanning-tree bpdu-guard
+    spanning-tree port-type admin-edge
+    spanning-tree root-guard
+    spanning-tree tcn-guard
+    loop-protect
+    loop-protect vlan 1,10,20,30,40,50,99,100,999
+    loop-protect action tx-rx-disable
+    port-access fallback-role Unauth
+    port-access onboarding-method concurrent enable
+    aaa authentication port-access allow-cdp-bpdu
+    aaa authentication port-access allow-lldp-bpdu
+    aaa authentication port-access client-limit 25
+    port-access allow-flood-traffic enable
+    aaa authentication port-access dot1x authenticator
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+    aaa authentication port-access mac-auth
+        cached-reauth
+        cached-reauth-period 86400
+        reauth
+        enable
+interface 1/1/13
+    description Admin down
+    shutdown
+    mtu 9198
+    vlan access 10
+
+! --- section break ---
+
+interface lag256
+    description VSX ISL
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 1
+    vlan trunk allowed all
+interface lag1
+    description Active-active uplink
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 999
+    vlan trunk allowed 10,20,30,40,50,99,100
+interface lag2
+    description L3 routed LAG to WAN
+    no shutdown
+    mtu 9198
+    ip address 10.254.2.0/31
+
+! --- section break ---
+
+interface loopback0
+    description Global router ID
+    ip address 10.255.0.1/32
+    ip ospf 1 area 0.0.0.0
+interface loopback1
+    description VTEP loopback
+    ip address 10.253.0.1/32
+    ip ospf 1 area 0.0.0.0
+interface loopback2
+    description PROD VRF router ID
+    vrf attach PROD
+    ip address 10.255.1.1/32
+    ip ospf 2 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan10
+    description Management SVI
+    no shutdown
+    vrf attach mgmt
+    ip address 10.10.0.1/24
+    ip helper-address 10.0.0.67
+    active-gateway ip mac 00:02:00:00:00:01
+    active-gateway ip 10.10.0.254
+interface vlan20
+    description Production SVI with OSPF
+    no shutdown
+    vrf attach PROD
+    ip address 10.20.0.1/24
+    ip helper-address 10.0.0.67
+    ip helper-address 10.0.0.68
+    ip ospf 2 area 0.0.0.0
+    active-gateway ip mac 00:02:00:00:00:02
+    active-gateway ip 10.20.0.254
+    mtu 9198
+interface vlan30
+    description Guest isolated
+    no shutdown
+    vrf attach GUEST
+    ip address 10.30.0.1/24
+    active-gateway ip mac 00:02:00:00:00:03
+    active-gateway ip 10.30.0.254
+interface vlan50
+    description Server SVI jumbo
+    no shutdown
+    vrf attach PROD
+    ip address 10.50.0.1/24
+    ip helper-address 10.0.0.67
+    ip ospf 2 area 0.0.0.0
+    active-gateway ip mac 00:02:00:00:00:04
+    active-gateway ip 10.50.0.254
+    mtu 9198
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.1
+    area 0.0.0.0
+    area 0.0.0.1
+router ospf 2
+    vrf PROD
+    router-id 10.255.1.1
+    area 0.0.0.0
+    vrf attach PROD
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+interface loopback1
+    description mega-sw-01 VTEP Loopback
+    ip address 10.253.0.1/32
+    ip ospf 1 area 0.0.0.0
+!
+interface vxlan 1
+    source ip 10.253.0.1
+    no shutdown
+        vni 10020 vlan 20
+        vni 10050 vlan 50
+        vni 10100 vlan 100
+    !
+evpn
+    vlan 20
+        rd auto
+        route-target export auto
+        route-target import auto
+    vlan 50
+        rd auto
+        route-target export auto
+        route-target import auto
+    vlan 100
+        rd auto
+        route-target export auto
+        route-target import auto
+
+! --- section break ---
+
+vsx
+    inter-switch-link lag256
+    role primary
+    keepalive peer 192.168.255.2 source 192.168.255.1 vrf mgmt
+    system-mac 00:01:00:00:00:ff
+
+! --- section break ---
+

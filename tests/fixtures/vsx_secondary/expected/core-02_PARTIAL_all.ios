@@ -1,0 +1,114 @@
+
+
+! --- section break ---
+
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname core-02
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf mgmt
+
+! --- section break ---
+
+vlan 10
+    name Mgmt
+vlan 20
+    name Prod
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+interface 1/1/2
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+
+! --- section break ---
+
+interface lag256
+    description VSX ISL
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 1
+    vlan trunk allowed all
+
+! --- section break ---
+
+interface loopback0
+    description Router ID
+    ip address 10.255.0.2/32
+    ip ospf 1 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan10
+    description Mgmt SVI secondary
+    no shutdown
+    vrf attach mgmt
+    ip address 10.10.0.2/24
+    active-gateway ip mac 00:02:00:00:00:01
+    active-gateway ip 10.10.0.254
+interface vlan20
+    description Prod SVI secondary
+    no shutdown
+    ip address 10.20.0.2/24
+    ip ospf 1 area 0.0.0.0
+    active-gateway ip mac 00:02:00:00:00:02
+    active-gateway ip 10.20.0.254
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.2
+    area 0.0.0.0
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vsx
+    inter-switch-link lag256
+    role secondary
+    keepalive peer 192.168.255.1 source 192.168.255.2 vrf mgmt
+    system-mac 00:01:00:00:00:01
+
+! --- section break ---
+

@@ -1,0 +1,90 @@
+
+
+! --- section break ---
+
+ssh server vrf default
+https server vrf default
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname access-01
+profile default
+clock timezone Europe/London
+ntp enable
+spanning-tree
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vlan 10
+    name Users
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description Member 1 - user access port
+    no shutdown
+    mtu 1500
+    vlan access 10
+interface 2/1/1
+    description Member 2 - user access port
+    no shutdown
+    mtu 1500
+    vlan access 10
+interface 1/1/48
+    description Uplink trunk
+    no shutdown
+    mtu 9198
+    vlan trunk native 1
+    vlan trunk allowed all
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vsf member 1
+    vsf member 1 link 1 1/1/50
+    vsf member 1 link 2 1/1/51
+vsf member 2
+    vsf member 2 link 1 1/1/50
+    vsf member 2 link 2 1/1/51
+vsf secondary-member 2

@@ -1,0 +1,129 @@
+
+
+! --- section break ---
+
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname core-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf mgmt
+
+! --- section break ---
+
+vlan 10
+    name Mgmt
+vlan 20
+    name Prod
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+interface 1/1/2
+    description VSX ISL member
+    no shutdown
+    mtu 9198
+    lag lag256
+interface 1/1/3
+    description Uplink LAG member
+    no shutdown
+    mtu 9198
+    lag lag1
+
+! --- section break ---
+
+interface lag256
+    description VSX ISL
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 1
+    vlan trunk allowed all
+interface lag1
+    description Uplink trunk
+    no shutdown
+    mtu 9198
+    lacp mode active
+    vlan trunk native 1
+    vlan trunk allowed 10,20
+
+! --- section break ---
+
+interface loopback0
+    description Router ID
+    ip address 10.255.0.1/32
+    ip ospf 1 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan10
+    description Mgmt SVI with VSX active gateway
+    no shutdown
+    vrf attach mgmt
+    ip address 10.10.0.1/24
+    ip helper-address 10.0.0.67
+    active-gateway ip mac 00:02:00:00:00:01
+    active-gateway ip 10.10.0.254
+interface vlan20
+    description Prod SVI with VSX active gateway
+    no shutdown
+    ip address 10.20.0.1/24
+    ip helper-address 10.0.0.67
+    ip ospf 1 area 0.0.0.0
+    active-gateway ip mac 00:02:00:00:00:02
+    active-gateway ip 10.20.0.254
+    mtu 9198
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.1
+    area 0.0.0.0
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vsx
+    inter-switch-link lag256
+    role primary
+    keepalive peer 192.168.255.2 source 192.168.255.1 vrf mgmt
+    system-mac 00:01:00:00:00:01
+
+! --- section break ---
+

@@ -1,0 +1,85 @@
+
+
+! --- section break ---
+
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname mgmt-sw-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+ip dns domain-name corp.local
+ip dns server-address 10.0.0.53
+
+! --- section break ---
+
+snmp-server vrf mgmt
+snmp-server system-description Management Switch
+snmp-server system-location NOC
+snmp-server system-contact snmp@corp.local
+snmpv3 user snmpv3admin auth sha auth-pass plaintext authpass123 priv aes priv-pass plaintext privpass456
+snmpv3 user snmpv3read auth sha auth-pass plaintext authread123 priv aes priv-pass plaintext privread456
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+vrf mgmt
+
+! --- section break ---
+
+vlan 10
+    name Mgmt
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    description Mgmt loopback
+    ip address 10.255.2.1/32
+
+! --- section break ---
+
+interface vlan10
+    description Mgmt SVI
+    no shutdown
+    vrf attach mgmt
+    ip address 10.10.0.5/24
+
+! --- section break ---
+
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

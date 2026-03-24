@@ -1,0 +1,105 @@
+
+
+! --- section break ---
+
+user admin group administrators password plaintext AES256:somehash
+ssh server vrf mgmt
+https server vrf mgmt
+ip source interface all interface loopback0
+
+! --- section break ---
+
+hostname core-01
+profile default
+clock timezone Europe/London
+ntp server 10.0.0.123 minpoll 4 maxpoll 4 iburst
+ntp enable
+spanning-tree
+ip dns domain-name lab.local
+ip dns server-address 10.0.0.53
+
+! --- section break ---
+
+snmp-server vrf mgmt
+snmp-server system-description Lab Core Switch
+snmp-server system-location Lab
+snmp-server system-contact noc@lab.local
+snmp-server community public
+
+! --- section break ---
+
+
+! --- section break ---
+
+banner motd !
+Authorised access only!
+
+! --- section break ---
+
+vrf mgmt
+
+! --- section break ---
+
+vlan 100
+    name Management
+vlan 200
+    name Production
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+interface 1/1/1
+    description P2P to core-02
+    no shutdown
+    mtu 9198
+    ip address 10.254.0.0/31
+    ip ospf 1 area 0.0.0.0
+    ip ospf network point-to-point
+interface 1/1/48
+    description Access port
+    no shutdown
+    mtu 9198
+    vlan access 100
+
+! --- section break ---
+
+
+! --- section break ---
+
+interface loopback0
+    description Router ID
+    ip address 10.255.0.1/32
+    ip ospf 1 area 0.0.0.0
+
+! --- section break ---
+
+interface vlan100
+    description Management SVI
+    no shutdown
+    vrf attach mgmt
+    ip address 10.100.0.1/24
+
+! --- section break ---
+
+router ospf 1
+    router-id 10.255.0.1
+    area 0.0.0.0
+
+! --- section break ---
+
+# iBGP for EVPN control plane - Route Reflector
+
+# iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
+
+
+! --- section break ---
+

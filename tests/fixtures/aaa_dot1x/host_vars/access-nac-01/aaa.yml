@@ -1,0 +1,8 @@
+radius_server_key: "globalradiuskey"
+radius_group_name: CORP_RADIUS
+dynamic_authorization: true
+radius_servers:
+  - address: 10.0.0.100
+    key: "server1key"
+  - address: 10.0.0.101
+    key: "server2key"

@@ -1,0 +1,17 @@
+vlans:
+  - id: 10
+    name: Management
+  - id: 20
+    name: Production
+  - id: 30
+    name: Guest
+  - id: 40
+    name: Voice
+  - id: 50
+    name: Servers
+  - id: 99
+    name: Auth-Default
+  - id: 100
+    name: Storage
+  - id: 999
+    name: Native

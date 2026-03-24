@@ -1,0 +1,13 @@
+hostname: gw-01
+platform: aoscx
+profile: default
+config_output_dir: ./generated_configs
+timezone: Europe/London
+ntp_servers:
+  - 10.0.0.123
+aruba:
+  central:
+    disabled: false
+dns:
+  domain_name:
+  name_servers: []

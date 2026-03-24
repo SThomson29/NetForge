@@ -1,0 +1,8 @@
+snmp:
+  version: v2c
+  vrf:
+  system_description:
+  location:
+  contact:
+  community:
+  v3_users: []

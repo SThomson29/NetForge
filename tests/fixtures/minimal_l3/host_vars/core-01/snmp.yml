@@ -1,0 +1,8 @@
+snmp:
+  version: v2c
+  vrf: mgmt
+  system_description: Lab Core Switch
+  location: Lab
+  contact: noc@lab.local
+  community: public
+  v3_users: []

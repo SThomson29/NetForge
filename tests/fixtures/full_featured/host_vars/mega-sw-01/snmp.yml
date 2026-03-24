@@ -1,0 +1,14 @@
+snmp:
+  version: v3
+  vrf: mgmt
+  system_description: Mega Featured Switch
+  location: DC1-Row3-Rack5
+  contact: noc@mega.corp.local
+  community: publicread
+  v3_users:
+    - username: snmpv3admin
+      auth_password: "authpassword1"
+      priv_password: "privpassword1"
+    - username: snmpv3monitor
+      auth_password: "authpassword2"
+      priv_password: "privpassword2"

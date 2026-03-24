@@ -1,0 +1,57 @@
+interface_groups: []
+physical_interfaces:
+  - name: "1/1/1"
+    description: "VSX ISL member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag256"
+  - name: "1/1/2"
+    description: "VSX ISL member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag256"
+lag_interfaces:
+  - name: lag256
+    description: "VSX ISL"
+    admin: up
+    mtu: 9198
+    lacp_mode: active
+    routed: false
+    port_type: trunk
+    trunk_allowed_vlans: "all"
+    trunk_native_vlan: 1
+loopback_interfaces:
+  - name: loopback0
+    description: "Router ID"
+    ip_address: "10.255.0.2"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+vlan_interfaces:
+  - name: vlan10
+    description: "Mgmt SVI secondary"
+    admin: up
+    vrf: mgmt
+    ip_address: "10.10.0.2"
+    ip_prefix: 24
+    helper_addresses: []
+    ospf_area: ""
+    ospf_process_id: 1
+    ospf_passive: true
+    active_gateway_ip: "10.10.0.254"
+    active_gateway_mac: "00:02:00:00:00:01"
+    mtu_jumbo: false
+  - name: vlan20
+    description: "Prod SVI secondary"
+    admin: up
+    vrf: ""
+    ip_address: "10.20.0.2"
+    ip_prefix: 24
+    helper_addresses: []
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+    ospf_passive: false
+    active_gateway_ip: "10.20.0.254"
+    active_gateway_mac: "00:02:00:00:00:02"
+    mtu_jumbo: false

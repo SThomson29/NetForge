@@ -38,9 +38,6 @@ fixtures/
 
 After cloning NetForge and ensuring `ansible-playbook` is on PATH:
 
-It is recommended to use a virtual environment to keep project dependencies
-isolated:
-
 ```bash
 # Generate all golden .ios files from current templates
 UPDATE_FIXTURES=1 pytest tests/test_generation.py::test_update_fixtures -v -s

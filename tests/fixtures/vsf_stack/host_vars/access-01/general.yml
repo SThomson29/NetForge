@@ -1,0 +1,12 @@
+hostname: access-01
+platform: aoscx
+profile: default
+config_output_dir: ./generated_configs
+timezone: Europe/London
+ntp_servers: []
+aruba:
+  central:
+    disabled: false
+dns:
+  domain_name:
+  name_servers: []

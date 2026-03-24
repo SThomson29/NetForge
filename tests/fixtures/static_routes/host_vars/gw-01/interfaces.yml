@@ -1,0 +1,22 @@
+interface_groups: []
+physical_interfaces:
+  - name: "1/1/1"
+    description: "WAN uplink"
+    admin: up
+    mtu: 9198
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.0.0"
+    ip_prefix: "31"
+    ospf_area: ""
+    ospf_process_id: 1
+lag_interfaces: []
+loopback_interfaces:
+  - name: loopback0
+    ip_address: "10.255.4.1"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: ""
+    ospf_process_id: 1
+vlan_interfaces: []

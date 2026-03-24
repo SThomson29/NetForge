@@ -1,0 +1,5 @@
+vrfs:
+  - name: mgmt
+  - name: PROD
+  - name: GUEST
+  - name: VOICE

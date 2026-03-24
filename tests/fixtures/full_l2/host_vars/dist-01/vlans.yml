@@ -1,0 +1,13 @@
+vlans:
+  - id: 10
+    name: Management
+  - id: 20
+    name: Production
+  - id: 30
+    name: Guest
+  - id: 40
+    name: Voice
+  - id: 99
+    name: Native
+  - id: 100
+    name: Server

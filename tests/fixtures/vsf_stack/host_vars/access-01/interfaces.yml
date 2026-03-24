@@ -1,0 +1,32 @@
+interface_groups: []
+physical_interfaces:
+  - name: "1/1/1"
+    description: "Member 1 - user access port"
+    admin: up
+    mtu: 1500
+    routed: false
+    port_type: access
+    access_vlan: "10"
+    trunk_allowed_vlans: ""
+    trunk_native_vlan: 1
+  - name: "2/1/1"
+    description: "Member 2 - user access port"
+    admin: up
+    mtu: 1500
+    routed: false
+    port_type: access
+    access_vlan: "10"
+    trunk_allowed_vlans: ""
+    trunk_native_vlan: 1
+  - name: "1/1/48"
+    description: "Uplink trunk"
+    admin: up
+    mtu: 9198
+    routed: false
+    port_type: trunk
+    access_vlan: ""
+    trunk_allowed_vlans: "all"
+    trunk_native_vlan: 1
+lag_interfaces: []
+loopback_interfaces: []
+vlan_interfaces: []

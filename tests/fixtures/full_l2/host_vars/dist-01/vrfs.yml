@@ -1,0 +1,4 @@
+vrfs:
+  - name: mgmt
+  - name: PROD
+  - name: GUEST

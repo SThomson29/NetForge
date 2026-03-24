@@ -1,0 +1,66 @@
+interface_groups: []
+physical_interfaces:
+  - name: "1/1/1"
+    description: "LACP active LAG1 member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag1"
+  - name: "1/1/2"
+    description: "LACP active LAG1 member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag1"
+  - name: "1/1/3"
+    description: "LACP passive LAG2 member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag2"
+  - name: "1/1/4"
+    description: "Static LAG3 member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag3"
+  - name: "1/1/5"
+    description: "Static LAG3 member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag3"
+lag_interfaces:
+  - name: lag1
+    description: "LACP active L2 trunk"
+    admin: up
+    mtu: 9198
+    lacp_mode: active
+    routed: false
+    port_type: trunk
+    trunk_allowed_vlans: "10,20"
+    trunk_native_vlan: 1
+  - name: lag2
+    description: "LACP passive L2 trunk"
+    admin: up
+    mtu: 9198
+    lacp_mode: passive
+    routed: false
+    port_type: trunk
+    trunk_allowed_vlans: "all"
+    trunk_native_vlan: 1
+  - name: lag3
+    description: "Static L3 routed LAG"
+    admin: up
+    mtu: 9198
+    lacp_mode: "off"
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.2.0"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+loopback_interfaces:
+  - name: loopback0
+    ip_address: "10.255.5.1"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+vlan_interfaces: []

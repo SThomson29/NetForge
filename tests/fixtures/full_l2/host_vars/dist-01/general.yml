@@ -1,0 +1,16 @@
+hostname: dist-01
+platform: aoscx
+profile: default
+config_output_dir: ./generated_configs
+timezone: Europe/London
+ntp_servers:
+  - 10.0.0.123
+  - 10.0.0.124
+aruba:
+  central:
+    disabled: true
+dns:
+  domain_name: corp.local
+  name_servers:
+    - 10.0.0.53
+    - 10.0.0.54

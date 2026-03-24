@@ -1,0 +1,7 @@
+management:
+  vrf: mgmt
+  source_interface: loopback0
+local_users:
+  - username: admin
+    group: administrators
+    password: "AES256:somehash"

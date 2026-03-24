@@ -1,0 +1,5 @@
+vlans:
+  - id: 100
+    name: Management
+  - id: 200
+    name: Production

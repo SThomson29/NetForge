@@ -1,5 +1,0 @@
-loopback_interface: loopback1
-loopback_ip:
-ospf_area: 0.0.0.0
-vxlan:
-  vni_map: []

@@ -1,9 +1,0 @@
-vlans:
-  - id: 10
-    name: Corp-Users
-  - id: 20
-    name: Printers
-  - id: 99
-    name: Auth-Fail
-  - id: 100
-    name: Guest

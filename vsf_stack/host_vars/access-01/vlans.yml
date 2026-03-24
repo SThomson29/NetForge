@@ -1,5 +1,0 @@
-vlans:
-  - id: 10
-    name: Users
-  - id: 20
-    name: Printers

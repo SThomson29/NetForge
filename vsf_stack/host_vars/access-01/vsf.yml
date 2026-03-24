@@ -1,7 +1,0 @@
-vsf:
-  enabled: true
-  interface1: "1/1/50"
-  interface2: "1/1/51"
-  members:
-    - id: 1
-    - id: 2

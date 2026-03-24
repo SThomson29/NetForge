@@ -1,0 +1,192 @@
+interface_groups:
+  - name: 10Gig
+    speed: 10g
+  - name: 25Gig
+    speed: 25g
+physical_interfaces:
+  - name: "1/1/1"
+    description: "VSX ISL member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag256"
+  - name: "1/1/2"
+    description: "VSX ISL member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag256"
+  - name: "1/1/3"
+    description: "Uplink LAG member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag1"
+  - name: "1/1/4"
+    description: "Uplink LAG member"
+    admin: up
+    mtu: 9198
+    lag_member: "lag1"
+  - name: "1/1/5"
+    description: "L3 routed to firewall"
+    admin: up
+    mtu: 9198
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.0.0"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+  - name: "1/1/6"
+    description: "L3 routed PROD VRF"
+    admin: up
+    mtu: 9198
+    routed: true
+    port_type: routed
+    vrf: "PROD"
+    ip_address: "10.254.1.0"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 2
+  - name: "1/1/10"
+    description: "Trunk to access"
+    admin: up
+    mtu: 9198
+    routed: false
+    port_type: trunk
+    access_vlan: ""
+    trunk_allowed_vlans: "10,20,30,40,99"
+    trunk_native_vlan: 999
+  - name: "1/1/11"
+    description: "Access port prod"
+    admin: up
+    mtu: 9198
+    routed: false
+    port_type: access
+    access_vlan: "20"
+    trunk_allowed_vlans: ""
+    trunk_native_vlan: 1
+  - name: "1/1/12"
+    description: "NAC authenticated port"
+    admin: up
+    mtu: 9198
+    routed: false
+    port_type: authenticated
+    auth_default_vlan: "99"
+  - name: "1/1/13"
+    description: "Admin down"
+    admin: down
+    mtu: 9198
+    routed: false
+    port_type: access
+    access_vlan: "10"
+    trunk_allowed_vlans: ""
+    trunk_native_vlan: 1
+lag_interfaces:
+  - name: lag256
+    description: "VSX ISL"
+    admin: up
+    mtu: 9198
+    lacp_mode: active
+    routed: false
+    port_type: trunk
+    trunk_allowed_vlans: "all"
+    trunk_native_vlan: 1
+  - name: lag1
+    description: "Active-active uplink"
+    admin: up
+    mtu: 9198
+    lacp_mode: active
+    routed: false
+    port_type: trunk
+    trunk_allowed_vlans: "10,20,30,40,50,99,100"
+    trunk_native_vlan: 999
+  - name: lag2
+    description: "L3 routed LAG to WAN"
+    admin: up
+    mtu: 9198
+    lacp_mode: "off"
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.2.0"
+    ip_prefix: "31"
+    ospf_area: ""
+    ospf_process_id: 1
+loopback_interfaces:
+  - name: loopback0
+    description: "Global router ID"
+    ip_address: "10.255.0.1"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+  - name: loopback1
+    description: "VTEP loopback"
+    ip_address: "10.253.0.1"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+  - name: loopback2
+    description: "PROD VRF router ID"
+    ip_address: "10.255.1.1"
+    ip_prefix: "32"
+    vrf: "PROD"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 2
+vlan_interfaces:
+  - name: vlan10
+    description: "Management SVI"
+    admin: up
+    vrf: mgmt
+    ip_address: "10.10.0.1"
+    ip_prefix: 24
+    helper_addresses:
+      - 10.0.0.67
+    ospf_area: ""
+    ospf_process_id: 1
+    ospf_passive: true
+    active_gateway_ip: "10.10.0.254"
+    active_gateway_mac: "00:02:00:00:00:01"
+    mtu_jumbo: false
+  - name: vlan20
+    description: "Production SVI with OSPF"
+    admin: up
+    vrf: PROD
+    ip_address: "10.20.0.1"
+    ip_prefix: 24
+    helper_addresses:
+      - 10.0.0.67
+      - 10.0.0.68
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 2
+    ospf_passive: false
+    active_gateway_ip: "10.20.0.254"
+    active_gateway_mac: "00:02:00:00:00:02"
+    mtu_jumbo: true
+  - name: vlan30
+    description: "Guest isolated"
+    admin: up
+    vrf: GUEST
+    ip_address: "10.30.0.1"
+    ip_prefix: 24
+    helper_addresses: []
+    ospf_area: ""
+    ospf_process_id: 1
+    ospf_passive: true
+    active_gateway_ip: "10.30.0.254"
+    active_gateway_mac: "00:02:00:00:00:03"
+    mtu_jumbo: false
+  - name: vlan50
+    description: "Server SVI jumbo"
+    admin: up
+    vrf: PROD
+    ip_address: "10.50.0.1"
+    ip_prefix: 24
+    helper_addresses:
+      - 10.0.0.67
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 2
+    ospf_passive: false
+    active_gateway_ip: "10.50.0.254"
+    active_gateway_mac: "00:02:00:00:00:04"
+    mtu_jumbo: true

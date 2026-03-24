@@ -1,0 +1,8 @@
+snmp:
+  version: v2c
+  vrf: mgmt
+  system_description: Distribution Switch
+  location: Server Room A
+  contact: noc@corp.local
+  community: public123
+  v3_users: []

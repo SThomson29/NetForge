@@ -1,0 +1,17 @@
+hostname: mega-sw-01
+platform: aoscx
+profile: default
+config_output_dir: ./generated_configs
+timezone: America/New_York
+ntp_servers:
+  - 10.0.0.123
+  - 10.0.0.124
+  - ntp.corp.local
+aruba:
+  central:
+    disabled: true
+dns:
+  domain_name: mega.corp.local
+  name_servers:
+    - 10.0.0.53
+    - 10.0.0.54

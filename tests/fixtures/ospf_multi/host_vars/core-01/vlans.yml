@@ -1,0 +1,5 @@
+vlans:
+  - id: 100
+    name: Prod
+  - id: 200
+    name: Mgmt

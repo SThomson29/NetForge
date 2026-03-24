@@ -1,0 +1,11 @@
+loopback_interface: loopback1
+loopback_ip: "10.253.0.1"
+ospf_area: "0.0.0.0"
+vxlan:
+  vni_map:
+    - vni: 10020
+      vlan: 20
+    - vni: 10050
+      vlan: 50
+    - vni: 10100
+      vlan: 100

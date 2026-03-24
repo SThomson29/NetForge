@@ -1,0 +1,13 @@
+management:
+  vrf: mgmt
+  source_interface: loopback0
+local_users:
+  - username: admin
+    group: administrators
+    password: "AES256:adminpass"
+  - username: netops
+    group: operators
+    password: "AES256:netopspass"
+  - username: readonly
+    group: auditors
+    password: "AES256:readonlypass"

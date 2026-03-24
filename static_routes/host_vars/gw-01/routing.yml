@@ -1,0 +1,6 @@
+ospf_instances: []
+device_role:
+bgp:
+  asn:
+  router_id:
+  neighbors: []

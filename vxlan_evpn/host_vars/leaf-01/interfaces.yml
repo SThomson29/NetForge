@@ -1,0 +1,60 @@
+interface_groups: []
+physical_interfaces:
+  - name: "1/1/1"
+    description: "P2P to spine-01"
+    admin: up
+    mtu: 9198
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.0.1"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+  - name: "1/1/2"
+    description: "P2P to spine-02"
+    admin: up
+    mtu: 9198
+    routed: true
+    port_type: routed
+    vrf: ""
+    ip_address: "10.254.0.3"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+lag_interfaces: []
+loopback_interfaces:
+  - name: loopback0
+    description: "Router ID"
+    ip_address: "10.255.0.10"
+    ip_prefix: "32"
+    vrf: ""
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+vlan_interfaces:
+  - name: vlan100
+    description: "App-Tier SVI"
+    admin: up
+    vrf: ""
+    ip_address: "10.100.0.1"
+    ip_prefix: 24
+    helper_addresses: []
+    ospf_area: ""
+    ospf_process_id: 1
+    ospf_passive: true
+    active_gateway_ip: ""
+    active_gateway_mac: ""
+    mtu_jumbo: true
+  - name: vlan200
+    description: "DB-Tier SVI"
+    admin: up
+    vrf: ""
+    ip_address: "10.200.0.1"
+    ip_prefix: 24
+    helper_addresses: []
+    ospf_area: ""
+    ospf_process_id: 1
+    ospf_passive: true
+    active_gateway_ip: ""
+    active_gateway_mac: ""
+    mtu_jumbo: true

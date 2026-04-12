@@ -1,0 +1,65 @@
+---
+# deploy_dryrun.yml
+# Connects to target switches and shows what would change
+# without actually applying any configuration.
+#
+# Expected extra-vars (passed by NetForgeUI):
+#   deploy_username:  switch username
+#   deploy_password:  switch password
+#   config_dir:       path to generated configs
+#   results_file:     path to write JSON results
+
+- name: "NetForge — Dry Run (diff only)"
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+
+  vars:
+    ansible_network_os: arubanetworks.aoscx.aoscx
+    ansible_user: "{{ deploy_username }}"
+    ansible_password: "{{ deploy_password }}"
+    ansible_become: true
+    ansible_become_method: enable
+    ansible_become_password: "{{ deploy_password }}"
+    config_file: "{{ config_dir }}/{{ inventory_hostname }}.ios"
+
+  tasks:
+
+    - name: Check config file exists
+      delegate_to: localhost
+      ansible.builtin.stat:
+        path: "{{ config_file }}"
+      register: config_stat
+
+    - name: Fail if config file missing
+      ansible.builtin.fail:
+        msg: "No generated config found at {{ config_file }}"
+      when: not config_stat.stat.exists
+
+    - name: Grab current running config
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - show running-config
+      register: running_config
+
+    - name: Dry-run config push (check mode)
+      arubanetworks.aoscx.aoscx_config:
+        src: "{{ config_file }}"
+      check_mode: true
+      diff: true
+      register: config_diff
+
+    - name: Build per-host result
+      ansible.builtin.set_fact:
+        deploy_result:
+          hostname: "{{ inventory_hostname }}"
+          mgmt_ip: "{{ ansible_host }}"
+          changed: "{{ config_diff.changed }}"
+          diff: "{{ config_diff.diff | default({}) }}"
+          commands: "{{ config_diff.commands | default([]) }}"
+
+    - name: Write result to file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ deploy_result | to_nice_json }}"
+        dest: "{{ results_file | default('/tmp') }}/{{ inventory_hostname }}_dryrun.json"

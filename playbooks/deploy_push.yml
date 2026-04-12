@@ -1,0 +1,157 @@
+---
+# deploy_push.yml
+# Safely deploys generated configs to target switches with
+# checkpoint rollback protection.
+#
+# Flow per switch:
+#   1. Create named checkpoint of current running-config
+#   2. Schedule a rollback job (dead-man's switch)
+#   3. Push the generated config
+#   4. Verify connectivity (wait + show command)
+#   5. If reachable: cancel rollback job, write memory
+#   6. If unreachable: rollback fires automatically on-box
+#
+# Expected extra-vars (passed by NetForgeUI):
+#   deploy_username:     switch username
+#   deploy_password:     switch password
+#   config_dir:          path to generated configs
+#   results_file:        path to write JSON results
+#   rollback_timeout:    rollback timer in minutes (default: 5)
+
+- name: "NetForge — Deploy with checkpoint protection"
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+  serial: 1
+
+  vars:
+    ansible_network_os: arubanetworks.aoscx.aoscx
+    ansible_user: "{{ deploy_username }}"
+    ansible_password: "{{ deploy_password }}"
+    ansible_become: true
+    ansible_become_method: enable
+    ansible_become_password: "{{ deploy_password }}"
+    config_file: "{{ config_dir }}/{{ inventory_hostname }}.ios"
+    rollback_mins: "{{ rollback_timeout | default(5) }}"
+    checkpoint_name: "netforge-pre-{{ ansible_date_time.iso8601_basic_short | default(lookup('pipe', 'date +%Y%m%dT%H%M%S')) }}"
+
+  tasks:
+
+    # ── Preflight ──────────────────────────────────────────
+
+    - name: Check config file exists
+      delegate_to: localhost
+      ansible.builtin.stat:
+        path: "{{ config_file }}"
+      register: config_stat
+
+    - name: Fail if config file missing
+      ansible.builtin.fail:
+        msg: "No generated config found at {{ config_file }}"
+      when: not config_stat.stat.exists
+
+    - name: Generate timestamp for checkpoint name
+      ansible.builtin.set_fact:
+        checkpoint_name: "netforge-pre-{{ lookup('pipe', 'date +%Y%m%dT%H%M%S') }}"
+
+    # ── Checkpoint ─────────────────────────────────────────
+
+    - name: Create pre-change checkpoint
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "copy running-config checkpoint {{ checkpoint_name }}"
+      register: checkpoint_result
+
+    - name: Verify checkpoint was created
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "show checkpoint {{ checkpoint_name }}"
+      register: checkpoint_verify
+      failed_when: checkpoint_verify.rc is defined and checkpoint_verify.rc != 0
+
+    # ── Schedule rollback (dead-man's switch) ──────────────
+
+    - name: Calculate rollback time
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        rollback_delay_secs: "{{ (rollback_mins | int) * 60 }}"
+
+    - name: Schedule automatic rollback job
+      arubanetworks.aoscx.aoscx_config:
+        lines:
+          - "job netforge-rollback delay {{ rollback_delay_secs }} \"copy checkpoint {{ checkpoint_name }} running-config\""
+
+    - name: Confirm rollback job is scheduled
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "show job netforge-rollback"
+      register: rollback_job_check
+
+    # ── Push config ────────────────────────────────────────
+
+    - name: Apply generated configuration
+      arubanetworks.aoscx.aoscx_config:
+        src: "{{ config_file }}"
+      register: config_push
+      diff: true
+
+    # ── Verify connectivity ────────────────────────────────
+
+    - name: Wait for switch to remain reachable
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 60
+      register: connectivity_check
+      ignore_errors: true
+
+    - name: Run verification command
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "show system | include 'Up Time'"
+      register: post_verify
+      when: connectivity_check is not failed
+
+    # ── Confirm or report failure ──────────────────────────
+
+    - name: "AUTO-CONFIRM: Cancel rollback job"
+      arubanetworks.aoscx.aoscx_config:
+        lines:
+          - "no job netforge-rollback"
+      when: connectivity_check is not failed
+
+    - name: "AUTO-CONFIRM: Write memory"
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "copy running-config startup-config"
+      when: connectivity_check is not failed
+
+    - name: Report — switch unreachable after push
+      ansible.builtin.debug:
+        msg: >
+          WARNING: {{ inventory_hostname }} ({{ ansible_host }}) became
+          unreachable after config push. Rollback job 'netforge-rollback'
+          is scheduled to fire in {{ rollback_mins }} minute(s), reverting
+          to checkpoint '{{ checkpoint_name }}'.
+      when: connectivity_check is failed
+
+    # ── Write results ─────────────────────────────────────
+
+    - name: Build per-host result
+      ansible.builtin.set_fact:
+        deploy_result:
+          hostname: "{{ inventory_hostname }}"
+          mgmt_ip: "{{ ansible_host }}"
+          checkpoint: "{{ checkpoint_name }}"
+          config_pushed: "{{ config_push.changed | default(false) }}"
+          reachable_after_push: "{{ connectivity_check is not failed }}"
+          confirmed: "{{ connectivity_check is not failed }}"
+          rollback_pending: "{{ connectivity_check is failed }}"
+          rollback_timeout_mins: "{{ rollback_mins }}"
+          diff: "{{ config_push.diff | default({}) }}"
+          commands: "{{ config_push.commands | default([]) }}"
+
+    - name: Write result to file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ deploy_result | to_nice_json }}"
+        dest: "{{ results_file | default('/tmp') }}/{{ inventory_hostname }}_deploy.json"

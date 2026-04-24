@@ -3,13 +3,14 @@
 # VSF
 # Template : CX_vsf.j2
 # Variables: vsf.enabled, vsf.members[].id,
-#            vsf.interface1, vsf.interface2
+#            vsf.members[].link1, vsf.members[].link2
 # ============================================================
-
 vsf:
   enabled: false
-  interface1: ""
-  interface2: ""
   members: []
   # - id: 1
+  #   link1: "1/1/49"
+  #   link2: "1/1/50"
   # - id: 2
+  #   link1: "1/1/25"
+  #   link2: "1/1/26"

@@ -1,7 +1,9 @@
 vsf:
   enabled: true
-  interface1: "1/1/50"
-  interface2: "1/1/51"
   members:
     - id: 1
+      link1: "1/1/50"
+      link2: "1/1/51"
     - id: 2
+      link1: "1/1/50"
+      link2: "1/1/51"

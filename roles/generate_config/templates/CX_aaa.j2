@@ -22,7 +22,6 @@ aaa group server radius {{ radius_group_name }}
     server {{ server.address }}
 {% endfor %}
 !
-aaa authentication login console group {{ radius_group_name }} local
 aaa authentication login default group {{ radius_group_name }} local
 aaa accounting all-mgmt default start-stop group {{ radius_group_name }}
 aaa accounting port-access start-stop interim 5 group {{ radius_group_name }}

@@ -9,6 +9,7 @@
               .access_vlan, .trunk_allowed_vlans, .trunk_native_vlan,
               .port_type (access|trunk|routed|authenticated)
               .auth_default_vlan (authenticated ports only)
+   Note     : mtu is not emitted on authenticated ports
    ============================================================= #}
 
 {% set vlan_id_list = vlans | default([]) | map(attribute='id') | list %}
@@ -23,7 +24,9 @@ interface {{ intf.name }}
 {% else %}
     shutdown
 {% endif %}
+{% if not is_auth %}
     mtu {{ intf.mtu | default(9198) }}
+{% endif %}
 {% if intf.lag_member | default("") %}
     lag {{ intf.lag_member }}
 {% elif is_routed %}

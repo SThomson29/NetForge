@@ -78,7 +78,6 @@ vlan 100
 interface 1/1/1
     description NAC authenticated port
     no shutdown
-    mtu 9198
     no routing
     vlan access 99
     spanning-tree bpdu-guard
@@ -107,7 +106,6 @@ interface 1/1/1
 interface 1/1/2
     description Another authenticated port
     no shutdown
-    mtu 9198
     no routing
     vlan access 99
     spanning-tree bpdu-guard

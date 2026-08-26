@@ -4,8 +4,8 @@ ip route 0.0.0.0/0 10.254.0.1 ip route 192.168.0.0/16 10.254.0.3  10ip route 172
 ! --- section break ---
 
 ssh server vrf default
-https server vrf default
-ip source interface all interface loopback0
+https-server vrf default
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -64,6 +64,12 @@ interface loopback0
 # iBGP for EVPN control plane - Route Reflector
 
 # iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
 
 
 ! --- section break ---

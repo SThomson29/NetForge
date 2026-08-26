@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf default
-https server vrf default
-ip source interface all interface loopback0
+https-server vrf default
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -71,21 +71,22 @@ interface 1/1/5
 interface lag1
     description LACP active L2 trunk
     no shutdown
-    mtu 9198
+    no routing
     lacp mode active
     vlan trunk native 1
     vlan trunk allowed 10,20
 interface lag2
     description LACP passive L2 trunk
     no shutdown
-    mtu 9198
+    no routing
     lacp mode passive
     vlan trunk native 1
     vlan trunk allowed all
 interface lag3
     description Static L3 routed LAG
     no shutdown
-    mtu 9198
+    no routing
+    routing
     ip address 10.254.2.0/31
     ip ospf 1 area 0.0.0.0
     ip ospf network point-to-point
@@ -110,6 +111,12 @@ router ospf 1
 # iBGP for EVPN control plane - Route Reflector
 
 # iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
 
 
 ! --- section break ---

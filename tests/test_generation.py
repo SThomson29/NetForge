@@ -444,6 +444,8 @@ class TestJinja2Templates:
                 'version': 'v2c', 'vrf': '', 'system_description': '',
                 'location': '', 'contact': '', 'community': '', 'v3_users': [],
             },
+            'sflow': {'collector_ip': '', 'agent_ip': ''},
+            'syslog': {'server': '', 'severity': ''},
             'radius_server_key': '',
             'radius_group_name': 'RADIUS_GROUP',
             'dynamic_authorization': False,

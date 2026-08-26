@@ -7,8 +7,8 @@ user admin group administrators password plaintext AES256:adminpass
 user netops group operators password plaintext AES256:netopspass
 user readonly group auditors password plaintext AES256:readonlypass
 ssh server vrf mgmt
-https server vrf mgmt
-ip source interface all interface loopback0
+https-server vrf mgmt
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -49,7 +49,6 @@ aaa group server radius CORP_RADIUS_GROUP
     server 10.0.0.101
     server 10.0.0.102
 !
-aaa authentication login console group CORP_RADIUS_GROUP local
 aaa authentication login default group CORP_RADIUS_GROUP local
 aaa accounting all-mgmt default start-stop group CORP_RADIUS_GROUP
 aaa accounting port-access start-stop interim 5 group CORP_RADIUS_GROUP
@@ -196,21 +195,22 @@ interface 1/1/13
 interface lag256
     description VSX ISL
     no shutdown
-    mtu 9198
+    no routing
     lacp mode active
     vlan trunk native 1
     vlan trunk allowed all
 interface lag1
     description Active-active uplink
     no shutdown
-    mtu 9198
+    no routing
     lacp mode active
     vlan trunk native 999
     vlan trunk allowed 10,20,30,40,50,99,100
 interface lag2
     description L3 routed LAG to WAN
     no shutdown
-    mtu 9198
+    no routing
+    routing
     ip address 10.254.2.0/31
 
 ! --- section break ---
@@ -322,6 +322,12 @@ vsx
     role primary
     keepalive peer 192.168.255.2 source 192.168.255.1 vrf mgmt
     system-mac 00:01:00:00:00:ff
+
+! --- section break ---
+
+
+! --- section break ---
+
 
 ! --- section break ---
 

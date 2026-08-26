@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf default
-https server vrf default
-ip source interface all interface loopback0
+https-server vrf default
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -88,3 +88,9 @@ vsf member 2
     vsf member 2 link 1 1/1/50
     vsf member 2 link 2 1/1/51
 vsf secondary-member 2
+
+! --- section break ---
+
+
+! --- section break ---
+

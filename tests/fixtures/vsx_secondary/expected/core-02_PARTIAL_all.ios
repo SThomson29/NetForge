@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf mgmt
-https server vrf mgmt
-ip source interface all interface loopback0
+https-server vrf mgmt
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -57,7 +57,7 @@ interface 1/1/2
 interface lag256
     description VSX ISL
     no shutdown
-    mtu 9198
+    no routing
     lacp mode active
     vlan trunk native 1
     vlan trunk allowed all
@@ -109,6 +109,12 @@ vsx
     role secondary
     keepalive peer 192.168.255.1 source 192.168.255.2 vrf mgmt
     system-mac 00:01:00:00:00:01
+
+! --- section break ---
+
+
+! --- section break ---
+
 
 ! --- section break ---
 

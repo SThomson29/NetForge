@@ -158,7 +158,6 @@ interface 1/1/11
 interface 1/1/12
     description NAC authenticated port
     no shutdown
-    mtu 9198
     no routing
     vlan access 99
     spanning-tree bpdu-guard

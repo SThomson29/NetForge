@@ -3,10 +3,10 @@
    Role     : generate_config
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
-   Variables: syslog_server
-   Note     : Only renders if snmp.community (v2c) or
-              snmp.v3_users (v3) are populated.
+   Variables: syslog_server, syslog_severity
+   Note     : Only renders if syslog_server is popualated
    ============================================================= #}
 
 {% if syslog_server | default("") %}
 logging {{ syslog_server }} severity {{ syslog_severity }}
+{% endif %}

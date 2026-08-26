@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf default
-https server vrf default
-ip source interface all interface loopback0
+https-server vrf default
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -109,6 +109,12 @@ router ospf 2
 # iBGP for EVPN control plane - Route Reflector
 
 # iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
 
 
 ! --- section break ---

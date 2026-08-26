@@ -1,0 +1,11 @@
+---
+# ============================================================
+# Sflow
+# Template : CX_sflow.j2
+# Variables: sflow.collector_ip, sflow.agent_ip
+# Note     : Leave collector_ip empty to skip generation
+# ============================================================
+
+sflow:
+  collector_ip: ""
+  agent_ip: ""

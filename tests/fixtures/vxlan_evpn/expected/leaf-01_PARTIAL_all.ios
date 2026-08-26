@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf default
-https server vrf default
-ip source interface all interface loopback0
+https-server vrf default
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -120,6 +120,12 @@ evpn
         rd auto
         route-target export auto
         route-target import auto
+
+! --- section break ---
+
+
+! --- section break ---
+
 
 ! --- section break ---
 

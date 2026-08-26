@@ -16,8 +16,8 @@
 user {{ user.username }} group {{ user.group | default("administrators") }} password plaintext {{ user.password }}
 {% endfor %}
 ssh server vrf {{ management.vrf if management.vrf else "default" }}
-https server vrf {{ management.vrf if management.vrf else "default" }}
+https-server vrf {{ management.vrf if management.vrf else "default" }}
 {% if management.source_interface | default("") %}
-ip source interface all interface {{ management.source_interface }}
+ip source-interface all interface {{ management.source_interface }}
 {% endif %}
 {% endif %}

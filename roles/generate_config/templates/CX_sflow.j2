@@ -1,0 +1,14 @@
+{# =============================================================
+   Template : CX_sflow.j2
+   Role     : generate_config
+   Device   : {{ inventory_hostname }}
+   Platform : {{ platform | default("aoscx") }}
+   Variables: sflow.collector_ip, sflow.agent_ip
+   Note     : Only renders if sflow_collector_ip is populated
+   ============================================================= #}
+
+{% if sflow.collector_ip | default("") %}
+sflow
+sflow collector {{ sflow.collector_ip }}
+sflow agent-ip {{ sflow.agent_ip }}
+{% endif %}

@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf mgmt
-https server vrf mgmt
-ip source interface all interface loopback0
+https-server vrf mgmt
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -73,6 +73,12 @@ interface vlan10
 # iBGP for EVPN control plane - Route Reflector
 
 # iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
 
 
 ! --- section break ---

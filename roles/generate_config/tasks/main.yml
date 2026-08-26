@@ -167,6 +167,22 @@
   delegate_to: localhost
   tags: [full, vsf]
 
+- name: Render | Sflow
+  ansible.builtin.template:
+    src: CX_sflow.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_19_sflow.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, sflow]
+
+- name: Render | Syslog
+  ansible.builtin.template:
+    src: CX_syslog.j2
+    dest: "{{ config_output_dir }}/{{ inventory_hostname }}_20_syslog.ios"
+    mode: "0644"
+  delegate_to: localhost
+  tags: [full, syslog]
+
 # --- Assembly ---
 
 - name: Find rendered section files for this host

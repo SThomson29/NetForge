@@ -3,8 +3,8 @@
 ! --- section break ---
 
 ssh server vrf mgmt
-https server vrf mgmt
-ip source interface all interface loopback0
+https-server vrf mgmt
+ip source-interface all interface loopback0
 
 ! --- section break ---
 
@@ -33,7 +33,6 @@ aaa group server radius CORP_RADIUS
     server 10.0.0.100
     server 10.0.0.101
 !
-aaa authentication login console group CORP_RADIUS local
 aaa authentication login default group CORP_RADIUS local
 aaa accounting all-mgmt default start-stop group CORP_RADIUS
 aaa accounting port-access start-stop interim 5 group CORP_RADIUS
@@ -166,6 +165,12 @@ interface vlan10
 # iBGP for EVPN control plane - Route Reflector
 
 # iBGP for EVPN control plane - Route Reflector Client
+
+
+! --- section break ---
+
+
+! --- section break ---
 
 
 ! --- section break ---

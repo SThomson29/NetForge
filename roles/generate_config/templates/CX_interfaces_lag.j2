@@ -3,7 +3,7 @@
    Role     : generate_config
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
-   Variables: lag_interfaces[].name, .description, .admin, .mtu,
+   Variables: lag_interfaces[].name, .description, .admin,
               .lacp_mode, .routed, .ip_address, .ip_prefix, .vrf,
               .ospf_area, .ospf_process_id,
               .trunk_allowed_vlans, .trunk_native_vlan, .access_vlan
@@ -13,12 +13,13 @@
 interface {{ lag.name }}
     description {{ lag.description | default("") }}
     no shutdown
-    mtu {{ lag.mtu | default(9198) }}
+    no routing
 {% if lag.lacp_mode | default("active") != "off" %}
     lacp mode {{ lag.lacp_mode | default("active") }}
 {% endif %}
 {% if lag.routed | default(false) %}
 {#  -- Routed (L3) LAG -- #}
+    routing
 {% if lag.vrf %}
     vrf attach {{ lag.vrf }}
 {% endif %}

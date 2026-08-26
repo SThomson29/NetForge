@@ -1,0 +1,13 @@
+---
+# ============================================================
+# Syslog
+# Template : CX_syslog.j2
+# Variables: syslog.server, syslog.severity
+# Note     : Leave server empty to skip generation
+#            severity: emerg | alert | crit | err | warning |
+#                      notice | info | debug
+# ============================================================
+
+syslog:
+  server: ""
+  severity: ""

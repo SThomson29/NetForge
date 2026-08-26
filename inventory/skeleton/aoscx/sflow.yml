@@ -2,10 +2,10 @@
 # ============================================================
 # Sflow
 # Template : CX_sflow.j2
-# Variables: .collector_ip .sflow_agent_ip
-# Note: Provide no sflow data to leave unused
+# Variables: sflow.collector_ip, sflow.agent_ip
+# Note     : Leave collector_ip empty to skip generation
 # ============================================================
- 
-sflow: []
-# collector_ip: 192.168.1.1
-# sflow_agent_ip: 192.168.10.1
+
+sflow:
+  collector_ip: ""
+  agent_ip: ""

@@ -2,10 +2,12 @@
 # ============================================================
 # Syslog
 # Template : CX_syslog.j2
-# Variables: .syslog_server .syslog_severity
-# Note: Leave syslog_server unopulated to not generate
+# Variables: syslog.server, syslog.severity
+# Note     : Leave server empty to skip generation
+#            severity: emerg | alert | crit | err | warning |
+#                      notice | info | debug
 # ============================================================
- 
-syslog: []
-# syslog_server: 192.168.1.1
-# syslog_severity: alert
+
+syslog:
+  server: ""
+  severity: ""

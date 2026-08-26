@@ -3,12 +3,12 @@
    Role     : generate_config
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
-   Variables: sflow_collector_ip, sflow_agent_ip
+   Variables: sflow.collector_ip, sflow.agent_ip
    Note     : Only renders if sflow_collector_ip is populated
    ============================================================= #}
 
-{% if sflow_collector_ip | default("") %}
+{% if sflow.collector_ip | default("") %}
 sflow
-sflow collector {{ sflow_collector_ip }}
-sflow agent-ip {{ sflow_agent_ip }}
+sflow collector {{ sflow.collector_ip }}
+sflow agent-ip {{ sflow.agent_ip }}
 {% endif %}

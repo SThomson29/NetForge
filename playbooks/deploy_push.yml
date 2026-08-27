@@ -15,6 +15,8 @@
 #   deploy_username:     switch username
 #   deploy_password:     switch password
 #   config_dir:          path to generated configs
+#   deploy_config_file:  optional full path to the file to deploy
+#                        (default: <config_dir>/<hostname>_FULL.ios)
 #   results_file:        path to write JSON results
 #   rollback_timeout:    rollback timer in minutes (default: 5)
 
@@ -31,7 +33,9 @@
     ansible_become: true
     ansible_become_method: enable
     ansible_become_password: "{{ deploy_password }}"
-    config_file: "{{ config_dir }}/{{ inventory_hostname }}.ios"
+    # Which generated file to deploy. NetForgeUI passes an explicit path as an
+    # extra-var; the default covers a full-run generation for direct CLI use.
+    config_file: "{{ deploy_config_file | default(config_dir ~ '/' ~ inventory_hostname ~ '_FULL.ios') }}"
     rollback_mins: "{{ rollback_timeout | default(5) }}"
     checkpoint_name: "netforge-pre-{{ ansible_date_time.iso8601_basic_short | default(lookup('pipe', 'date +%Y%m%dT%H%M%S')) }}"
 

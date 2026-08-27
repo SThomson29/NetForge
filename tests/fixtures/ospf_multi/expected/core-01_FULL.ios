@@ -50,6 +50,8 @@ interface 1/1/1
     mtu 9198
     ip address 10.254.0.0/31
     ip ospf 1 area 0.0.0.0
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext P2PAreaZeroKey
     ip ospf network point-to-point
 interface 1/1/2
     description P2P to dist in area 1
@@ -90,6 +92,8 @@ interface vlan100
     vrf attach PROD
     ip address 10.100.0.1/24
     ip ospf 2 area 0.0.0.0
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext SviAreaZeroKey
     ip ospf passive
 
 ! --- section break ---

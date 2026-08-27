@@ -56,6 +56,7 @@ lag_interfaces:
     ip_prefix: "31"
     ospf_area: "0.0.0.0"
     ospf_process_id: 1
+    ospf_auth_key: "RoutedLagKey"
 loopback_interfaces:
   - name: loopback0
     ip_address: "10.255.5.1"

@@ -18,7 +18,7 @@ interface_groups: []
 # Physical Interfaces
 # Variables: physical_interfaces[].name, .description, .admin,
 #   .mtu, .lag_member, .routed, .vrf, .ip_address, .ip_prefix,
-#   .ospf.area, .ospf.auth_key, .access_vlan,
+#   .ospf_area, .ospf_process_id, .ospf_auth_key, .access_vlan,
 #   .trunk_allowed_vlans, .trunk_native_vlan
 # ------------------------------------------------------------
 physical_interfaces: []
@@ -33,9 +33,9 @@ physical_interfaces: []
 #   vrf: ""
 #   ip_address: ""
 #   ip_prefix: 31
-#   ospf:
-#     area: "0.0.0.0"
-#     auth_key: ""
+#   ospf_area: "0.0.0.0"
+#   ospf_process_id: 1
+#   ospf_auth_key: ""           # OSPF MD5 key; empty = no authentication
 #   access_vlan: ""             # L2 access port
 #   trunk_allowed_vlans: ""     # L2 trunk port
 #   trunk_native_vlan: 1
@@ -44,7 +44,7 @@ physical_interfaces: []
 # LAG Interfaces
 # Variables: lag_interfaces[].name, .description, .admin, .mtu,
 #   .lacp_mode, .routed, .vrf, .ip_address, .ip_prefix,
-#   .ospf.area, .ospf.auth_key, .access_vlan,
+#   .ospf_area, .ospf_process_id, .ospf_auth_key, .access_vlan,
 #   .trunk_allowed_vlans, .trunk_native_vlan
 #   (member binding driven by physical_interfaces[].lag_member)
 # ------------------------------------------------------------
@@ -58,9 +58,9 @@ lag_interfaces: []
 #   vrf: ""
 #   ip_address: ""
 #   ip_prefix: 31
-#   ospf:
-#     area: "0.0.0.0"
-#     auth_key: ""
+#   ospf_area: "0.0.0.0"
+#   ospf_process_id: 1
+#   ospf_auth_key: ""           # OSPF MD5 key; empty = no authentication
 #   access_vlan: ""
 #   trunk_allowed_vlans: "all"
 #   trunk_native_vlan: 1
@@ -68,7 +68,7 @@ lag_interfaces: []
 # ------------------------------------------------------------
 # Loopback Interfaces
 # Variables: loopback_interfaces[].name, .description, .vrf,
-#            .ip_address, .ip_prefix, .ospf.area
+#            .ip_address, .ip_prefix, .ospf_area, .ospf_process_id
 # ------------------------------------------------------------
 loopback_interfaces: []
 # - name: loopback0
@@ -83,7 +83,7 @@ loopback_interfaces: []
 # VLAN Interfaces (SVIs)
 # Variables: vlan_interfaces[].name, .description, .admin, .vrf,
 #   .ip_address, .ip_prefix, .helper_addresses[], .ospf_area,
-#   .ospf_passive, .active_gateway_ip, .active_gateway_mac,
+#   .ospf_auth_key, .ospf_passive, .active_gateway_ip, .active_gateway_mac,
 #   .mtu_jumbo
 # ------------------------------------------------------------
 vlan_interfaces: []

@@ -5,7 +5,7 @@
    Platform : {{ platform | default("aoscx") }}
    Variables: lag_interfaces[].name, .description, .admin,
               .lacp_mode, .routed, .ip_address, .ip_prefix, .vrf,
-              .ospf_area, .ospf_process_id,
+              .ospf_area, .ospf_process_id, .ospf_auth_key,
               .trunk_allowed_vlans, .trunk_native_vlan, .access_vlan
    ============================================================= #}
 
@@ -26,6 +26,10 @@ interface {{ lag.name }}
     ip address {{ lag.ip_address }}/{{ lag.ip_prefix if lag.ip_prefix else 31 }}
 {% if lag.ospf_area %}
     ip ospf {{ lag.ospf_process_id if lag.ospf_process_id else 1 }} area {{ lag.ospf_area }}
+{% if lag.ospf_auth_key | default("") %}
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext {{ lag.ospf_auth_key }}
+{% endif %}
     ip ospf network point-to-point
 {% endif %}
 {% else %}

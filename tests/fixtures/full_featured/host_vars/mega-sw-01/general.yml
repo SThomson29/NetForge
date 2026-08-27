@@ -7,9 +7,6 @@ ntp_servers:
   - 10.0.0.123
   - 10.0.0.124
   - ntp.corp.local
-aruba:
-  central:
-    disabled: true
 dns:
   domain_name: mega.corp.local
   name_servers:

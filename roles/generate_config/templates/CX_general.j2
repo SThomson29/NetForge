@@ -16,9 +16,6 @@ ntp server {{ ntp_server }} minpoll 4 maxpoll 4 iburst
 {% endfor %}
 ntp enable
 spanning-tree
-{% if aruba is defined and aruba.central is defined and aruba.central.disabled | default(false) %}
-no hpe-anw-central
-{% endif %}
 {% if dns is defined %}
 {% if dns.domain_name | default("") %}
 ip dns domain-name {{ dns.domain_name }}

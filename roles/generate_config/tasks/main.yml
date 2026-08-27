@@ -223,7 +223,7 @@
     assembled_filename: >-
       {{
         inventory_hostname + '_FULL.ios'
-        if ansible_run_tags | intersect(['full', 'untagged']) | length > 0
+        if ansible_run_tags | intersect(['full', 'untagged', 'all']) | length > 0
         else inventory_hostname + '_PARTIAL_' + (ansible_run_tags | sort | join('-')) + '.ios'
       }}
   delegate_to: localhost

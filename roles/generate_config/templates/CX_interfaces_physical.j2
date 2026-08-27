@@ -5,7 +5,7 @@
    Platform : {{ platform | default("aoscx") }}
    Variables: physical_interfaces[].name, .description, .admin,
               .mtu, .lag_member, .routed, .ip_address, .ip_prefix,
-              .vrf, .ospf_area, .ospf_process_id,
+              .vrf, .ospf_area, .ospf_process_id, .ospf_auth_key,
               .access_vlan, .trunk_allowed_vlans, .trunk_native_vlan,
               .port_type (access|trunk|routed|authenticated)
               .auth_default_vlan (authenticated ports only)
@@ -37,6 +37,10 @@ interface {{ intf.name }}
     ip address {{ intf.ip_address }}/{{ intf.ip_prefix if intf.ip_prefix else 31 }}
 {% if intf.ospf_area %}
     ip ospf {{ intf.ospf_process_id if intf.ospf_process_id else 1 }} area {{ intf.ospf_area }}
+{% if intf.ospf_auth_key | default("") %}
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext {{ intf.ospf_auth_key }}
+{% endif %}
     ip ospf network point-to-point
 {% endif %}
 {% elif is_auth %}

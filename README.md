@@ -213,6 +213,34 @@ physical_interfaces:
     ospf_process_id: 1
 ```
 
+### interfaces.yml — OSPF authentication
+
+`ospf_auth_key` enables OSPF MD5 authentication on an interface. Valid on
+routed physical interfaces, routed LAGs and SVIs. Leave it empty (or omit it)
+for no authentication — the key ID is fixed at 1.
+
+```yaml
+physical_interfaces:
+  - name: "1/1/1"
+    routed: true
+    port_type: routed
+    ip_address: "10.254.0.0"
+    ip_prefix: "31"
+    ospf_area: "0.0.0.0"
+    ospf_process_id: 1
+    ospf_auth_key: "SharedAreaZeroKey"
+```
+
+Renders as:
+
+```
+    ip ospf 1 area 0.0.0.0
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext SharedAreaZeroKey
+```
+
+Not applicable to loopback interfaces.
+
 ### interfaces.yml — authenticated port (dot1x/MAC-auth)
 
 ```yaml

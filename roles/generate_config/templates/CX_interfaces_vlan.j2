@@ -6,7 +6,7 @@
    Variables: vlan_interfaces (name, description, ip_address,
               ip_prefix, vrf, admin, helper_addresses,
               active_gateway_ip, active_gateway_mac,
-              ospf_area, ospf_passive, mtu_jumbo)
+              ospf_area, ospf_auth_key, ospf_passive, mtu_jumbo)
    ============================================================= #}
 
 {% for intf in (vlan_interfaces or []) %}
@@ -30,6 +30,10 @@ interface {{ intf.name }}
 {% endfor %}
 {% if intf.ospf_area %}
     ip ospf {{ intf.ospf_process_id if intf.ospf_process_id else 1 }} area {{ intf.ospf_area }}
+{% if intf.ospf_auth_key | default("") %}
+    ip ospf authentication message-digest
+    ip ospf message-digest-key 1 md5 plaintext {{ intf.ospf_auth_key }}
+{% endif %}
 {% if intf.ospf_passive | default(false) %}
     ip ospf passive
 {% endif %}

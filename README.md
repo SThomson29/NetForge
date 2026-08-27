@@ -9,7 +9,7 @@ Designed to be used alongside [NetForgeUI](https://github.com/SThomson29/NetForg
 ## Features
 
 - Generates complete AOS-CX switch configurations from structured YAML variable files
-- Supports all major AOS-CX features: L2/L3 interfaces, LAGs, SVIs, VRFs, OSPF (multi-instance, VRF-scoped), iBGP, VXLAN/EVPN, VSX, VSF, SNMP v2c/v3, RADIUS/dot1x, static routes, banners
+- Supports all major AOS-CX features: L2/L3 interfaces, LAGs, SVIs, VRFs, OSPF (multi-instance, VRF-scoped), iBGP, VXLAN/EVPN, VSX, VSF, SNMP v2c/v3, RADIUS/dot1x, static routes, banners, syslog, sFlow
 - Output is a single assembled `.ios` file per switch, or per-section partial files when using tags
 - Partial generation via Ansible tags — generate only the sections you need
 
@@ -53,6 +53,8 @@ NetForge/
 │           ├── interfaces.yml
 │           ├── routing.yml
 │           ├── vxlan.yml
+│           ├── syslog.yml
+│           ├── sflow.yml
 │           ├── vsx.yml             # VSX only
 │           └── vsf.yml             # VSF only
 ├── playbooks/
@@ -151,7 +153,8 @@ Output is written as `<hostname>_PARTIAL_<tags>.ios`.
 
 | Tag | Section |
 |---|---|
-| `general` | Hostname, NTP, DNS, timezone, Aruba Central |
+| `full` | Every section (this is what a normal run uses) |
+| `general` | Hostname, NTP, DNS, timezone |
 | `management` | Management VRF, source interface, local users |
 | `banner` | MOTD and exec banners |
 | `snmp` | SNMP v2c/v3 |
@@ -159,7 +162,8 @@ Output is written as `<hostname>_PARTIAL_<tags>.ios`.
 | `vrfs` | VRF definitions |
 | `vlans` | VLAN definitions |
 | `staticroutes` | Static routes |
-| `interfaces` | All interface types |
+| `interfaces` | All interface types (groups, physical, LAG, loopback, SVI) |
+| `interface_groups` | Interface group / speed split config only |
 | `interfaces_physical` | Physical interfaces only |
 | `interfaces_lag` | LAG interfaces only |
 | `interfaces_loopback` | Loopback interfaces only |
@@ -170,6 +174,8 @@ Output is written as `<hostname>_PARTIAL_<tags>.ios`.
 | `vxlan` | VXLAN/VTEP |
 | `vsx` | VSX stacking |
 | `vsf` | VSF stacking |
+| `syslog` | Syslog server |
+| `sflow` | sFlow collector and agent |
 
 ---
 
@@ -184,9 +190,6 @@ profile: default
 timezone: Europe/London
 ntp_servers:
   - 10.0.0.123
-aruba:
-  central:
-    disabled: false
 dns:
   domain_name: corp.local
   name_servers:
@@ -217,10 +220,38 @@ physical_interfaces:
   - name: "1/1/5"
     description: "NAC port"
     admin: up
-    mtu: 9198
     port_type: authenticated
     auth_default_vlan: "99"
 ```
+
+`mtu` is deliberately absent — it is not applicable to an authenticated port and
+is not rendered for `port_type: authenticated`, even if present in the file.
+
+### syslog.yml
+
+```yaml
+syslog:
+  server: "10.0.0.50"
+  severity: "info"
+```
+
+Nothing is generated unless `server` is populated. Valid severities are
+`emerg`, `alert`, `crit`, `err`, `warning`, `notice`, `info`, `debug`.
+
+Leaving `severity` empty is safe — the keyword is omitted entirely rather than
+rendering a `severity` with no value. Note that the switch then applies its own
+default severity rather than none.
+
+### sflow.yml
+
+```yaml
+sflow:
+  collector_ip: "10.0.0.60"
+  agent_ip: "10.255.0.1"
+```
+
+Nothing is generated unless `collector_ip` is populated. Leaving `agent_ip`
+empty is safe — the `sflow agent-ip` line is omitted rather than rendered blank.
 
 ### routing.yml — multiple OSPF instances
 

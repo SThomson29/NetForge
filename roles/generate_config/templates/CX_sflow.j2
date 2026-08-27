@@ -4,11 +4,14 @@
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
    Variables: sflow.collector_ip, sflow.agent_ip
-   Note     : Only renders if sflow_collector_ip is populated
+   Note     : Only renders if sflow.collector_ip is populated.
+              agent-ip is omitted entirely when left empty.
    ============================================================= #}
 
 {% if sflow.collector_ip | default("") %}
 sflow
 sflow collector {{ sflow.collector_ip }}
+{% if sflow.agent_ip | default("") %}
 sflow agent-ip {{ sflow.agent_ip }}
+{% endif %}
 {% endif %}

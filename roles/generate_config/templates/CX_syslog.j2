@@ -4,9 +4,12 @@
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
    Variables: syslog.server, syslog.severity
-   Note     : Only renders if syslog_server is popualated
+   Note     : Only renders if syslog.server is populated.
+              severity is omitted entirely when left empty, so a blank
+              value cannot emit a dangling "severity" keyword.
    ============================================================= #}
 
 {% if syslog.server | default("") %}
-logging {{ syslog.server }} severity {{ syslog.severity }}
+{% set severity = " severity " ~ syslog.severity if syslog.severity | default("") else "" %}
+logging {{ syslog.server }}{{ severity }}
 {% endif %}

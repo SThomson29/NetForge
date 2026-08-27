@@ -20,7 +20,6 @@ ntp server 10.0.0.124 minpoll 4 maxpoll 4 iburst
 ntp server ntp.corp.local minpoll 4 maxpoll 4 iburst
 ntp enable
 spanning-tree
-no hpe-anw-central
 ip dns domain-name mega.corp.local
 ip dns server-address 10.0.0.53
 ip dns server-address 10.0.0.54

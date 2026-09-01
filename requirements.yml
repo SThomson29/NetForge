@@ -1,13 +1,14 @@
 ---
-# Ansible Galaxy requirements for CX-ConfigGen
+# Ansible Galaxy requirements for NetForge
 # Install with: ansible-galaxy install -r requirements.yml
 #
-# No external collections are currently required — all modules used are
-# ansible.builtin. Add entries here if you introduce community or
-# vendor-specific collections in future templates.
+# Pinned rather than floated — these playbooks talk to live switches, so the
+# runtime should be reproducible. NetForgeUI installs the same version in its
+# image (see its Dockerfile); keep the two in step.
 
-collections: []
-# - name: community.general
-#   version: ">=8.0"
-# - name: arubanetworks.aoscx
-#   version: ">=4.0"
+collections:
+  # Required by the deploy and firmware playbooks.
+  #   aoscx_config / aoscx_command  — SSH/CLI modules
+  #   aoscx_upload_firmware / aoscx_boot_firmware — REST modules (need pyaoscx)
+  - name: arubanetworks.aoscx
+    version: "4.5.1"

@@ -14,18 +14,38 @@ Designed to be used alongside [NetForgeUI](https://github.com/SThomson29/NetForg
 - Partial generation via Ansible tags — generate only the sections you need
 
 ---
+- Deploys generated config to live switches with a diff-first dry run, an on-box
+  checkpoint and a dead-man's-switch rollback
+- Pushes AOS-CX firmware to a chosen partition and boots to it, optionally
+  permitting non-failsafe subcomponent updates
+
+---
 
 ## Requirements
 
-- Python 3.9+
-- Ansible
-- `ansible-playbook` on your PATH
+Config generation needs only Ansible:
 
-Install Ansible:
+- Python 3.9+
+- `ansible-core` and `ansible-playbook` on your PATH
 
 ```bash
-pip install ansible
+pip install ansible-core
 ```
+
+The deploy and firmware playbooks additionally need the AOS-CX collection and,
+for the REST modules, `pyaoscx`:
+
+```bash
+pip install pyaoscx
+ansible-galaxy install -r requirements.yml
+```
+
+`requirements.yml` pins the collection version. NetForgeUI installs the same
+version in its image — keep the two in step.
+
+Only `aoscx_config` and `aoscx_command` use SSH; every other module in the
+collection, including both firmware modules, uses the REST API. A single play
+cannot mix the two, which is why the firmware playbook is split into three.
 
 ---
 
@@ -58,7 +78,11 @@ NetForge/
 │           ├── vsx.yml             # VSX only
 │           └── vsf.yml             # VSF only
 ├── playbooks/
-│   └── generate_configs.yml
+│   ├── generate_configs.yml    # render host_vars into .ios files
+│   ├── deploy_dryrun.yml       # diff generated config against running config
+│   ├── deploy_push.yml         # push config with checkpoint + rollback
+│   └── firmware_upgrade.yml    # upload image, optionally permit non-failsafe
+│                               #   updates, boot to partition
 └── roles/
     └── generate_config/
         ├── tasks/
@@ -316,6 +340,67 @@ vsx:
 
 ---
 
+## Deploy and Firmware Playbooks
+
+These talk to live switches. NetForgeUI drives them and passes the extra-vars
+below; they can also be run directly.
+
+### deploy_dryrun.yml — diff only
+
+Shows what would change without applying anything.
+
+| Extra-var | Required | Description |
+|---|---|---|
+| `deploy_username` / `deploy_password` | yes | switch credentials |
+| `config_dir` | yes | directory holding generated configs |
+| `deploy_config_file` | no | explicit file to deploy (default `<config_dir>/<hostname>_FULL.ios`) |
+| `results_file` | yes | directory to write per-host JSON into |
+
+### deploy_push.yml — apply with rollback
+
+Takes an on-box checkpoint, schedules a rollback job, pushes the config, then
+cancels the rollback only once the switch is confirmed reachable. Same
+extra-vars as the dry run, plus:
+
+| Extra-var | Required | Description |
+|---|---|---|
+| `rollback_timeout` | no | rollback timer in minutes (default 5) |
+
+### firmware_upgrade.yml — upload and boot
+
+Three plays, because a play cannot mix REST and SSH modules: upload (REST),
+permit non-failsafe updates (SSH, only if asked), boot (REST).
+
+| Extra-var | Required | Description |
+|---|---|---|
+| `deploy_username` / `deploy_password` | yes | switch credentials |
+| `firmware_file` | yes | path to the `.swi` image on the controller |
+| `firmware_partition` | no | `primary` or `secondary` (default `secondary`) |
+| `allow_unsafe` | no | permit non-failsafe subcomponent updates (default `false`) |
+| `unsafe_window_mins` | no | how long to permit them for, 1–120 (default 30) |
+| `results_file` | yes | directory to write per-host JSON into |
+
+```bash
+ansible-playbook -i inventory/hosts.ini playbooks/firmware_upgrade.yml \
+  -e deploy_username=admin -e deploy_password=secret \
+  -e firmware_file=/images/ArubaOS-CX_6400-6300_10_16_0002.swi \
+  -e firmware_partition=secondary \
+  -e results_file=/tmp/fwresults
+```
+
+**On `allow_unsafe`.** Some releases include firmware updates for programmable
+subcomponents that will not apply without explicit permission. The command has
+no REST equivalent, so it is issued over SSH, and it was renamed in 10.15.1010
+— the playbook reads `show version` and picks `allow-non-failsafe-updates` or
+`allow-unsafe-updates` to match the release the switch is currently running,
+not the one being installed. The permission is a countdown timer, so it is set
+after the upload rather than before it.
+
+The upload polls for up to ten minutes, and the boot allows fifteen minutes for
+the switch to return, since a non-failsafe update can involve several reboots.
+
+---
+
 ## Testing
 
 Template smoke tests (no Ansible required):
@@ -341,6 +426,10 @@ pytest tests/test_generation.py -v
 
 ## Using with NetForgeUI
 
-NetForgeUI clones this repo automatically on startup and drives generation via the web interface. No manual setup of `hosts.ini` or `host_vars` is needed — the UI manages all of that per project workspace.
+NetForgeUI clones this repo automatically on startup and drives generation, deploy and firmware via the web interface. No manual setup of `hosts.ini` or `host_vars` is needed — the UI manages all of that per project workspace.
+
+Generation runs in a sandboxed ephemeral container, because it renders
+user-authored Jinja. Deploy and firmware run in the NetForgeUI container
+itself, since they render nothing and need network access to the switches.
 
 See the [NetForgeUI repo](https://github.com/SThomson29/NetForgeUI) for deployment instructions.

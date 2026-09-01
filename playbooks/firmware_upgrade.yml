@@ -1,0 +1,197 @@
+---
+# firmware_upgrade.yml
+# Uploads an AOS-CX image to a partition, optionally permits non-failsafe
+# (subcomponent) updates, then boots the switch to that partition.
+#
+# Intended as a bench commissioning step, before a switch carries traffic.
+#
+# Expected extra-vars (passed by NetForgeUI):
+#   deploy_username:      switch username
+#   deploy_password:      switch password
+#   firmware_file:        full path to the .swi image on the controller
+#   firmware_partition:   'primary' or 'secondary' (default: secondary)
+#   allow_unsafe:         permit non-failsafe subcomponent updates (default: false)
+#   unsafe_window_mins:   minutes to permit them for (default: 30, max 120)
+#   results_file:         directory to write JSON results into
+#
+# This runs as three plays because a single play cannot mix the collection's
+# REST modules with its SSH/CLI modules. Only aoscx_config and aoscx_command
+# use SSH; everything else, including both firmware modules, is REST via
+# pyaoscx.
+#
+# Ordering follows HPE's documented procedure: stage the image into the
+# non-current boot bank, permit device updates, then boot. The unsafe-updates
+# permission is a countdown timer, so it is set after the upload (which can
+# take ten minutes) rather than before it.
+
+
+# ── Play 1: upload the image (REST) ────────────────────────────────────────
+
+- name: "NetForge — Upload firmware"
+  hosts: all
+  gather_facts: false
+  connection: arubanetworks.aoscx.aoscx
+  serial: 1
+
+  vars:
+    ansible_network_os: arubanetworks.aoscx.aoscx
+    ansible_user: "{{ deploy_username }}"
+    ansible_password: "{{ deploy_password }}"
+    ansible_aoscx_validate_certs: false
+    ansible_aoscx_use_proxy: false
+    ansible_acx_no_proxy: true
+    partition: "{{ firmware_partition | default('secondary') }}"
+
+  tasks:
+
+    - name: Check firmware image exists
+      delegate_to: localhost
+      ansible.builtin.stat:
+        path: "{{ firmware_file }}"
+      register: image_stat
+
+    - name: Fail if firmware image missing
+      ansible.builtin.fail:
+        msg: "No firmware image found at {{ firmware_file }}"
+      when: not image_stat.stat.exists
+
+    # wait_firmware_upload defaults to false, which returns as soon as the
+    # transfer starts. We want the task to reflect the real outcome, so it is
+    # enabled — note the module then polls 10 times at 60s intervals, so this
+    # task alone can run for ten minutes.
+    - name: Upload image to {{ partition }} partition
+      arubanetworks.aoscx.aoscx_upload_firmware:
+        partition_name: "{{ partition }}"
+        firmware_file_path: "{{ firmware_file }}"
+        wait_firmware_upload: true
+      register: upload_result
+
+
+# ── Play 2: permit non-failsafe updates (SSH), only if asked ───────────────
+#
+# There is no REST API for this command, so it has to go over SSH. It is also
+# interactive, hence prompt/answer — aoscx_config cannot answer prompts, only
+# aoscx_command can.
+
+- name: "NetForge — Permit non-failsafe updates"
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+  serial: 1
+
+  vars:
+    ansible_network_os: arubanetworks.aoscx.aoscx
+    ansible_user: "{{ deploy_username }}"
+    ansible_password: "{{ deploy_password }}"
+    ansible_become: true
+    ansible_become_method: enable
+    ansible_become_password: "{{ deploy_password }}"
+    unsafe_mins: "{{ unsafe_window_mins | default(30) }}"
+
+  tasks:
+
+    - name: Skip unless non-failsafe updates were requested
+      ansible.builtin.meta: end_host
+      when: not (allow_unsafe | default(false) | bool)
+
+    - name: Fail if the requested window exceeds the platform maximum
+      ansible.builtin.fail:
+        msg: >-
+          unsafe_window_mins must be between 1 and 120 (got {{ unsafe_mins }}).
+      when: (unsafe_mins | int) < 1 or (unsafe_mins | int) > 120
+
+    - name: Read running software version
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "show version"
+      register: version_out
+
+    # The command was renamed in 10.15.1010. It runs against the image the
+    # switch is currently on — which, for an upgrade, is the older one — so
+    # both spellings occur in practice and the choice must follow the running
+    # release, not the target one.
+    # regex_search returns None on no match, and `first` cannot handle that,
+    # so fall back to a list before selecting.
+    - name: Determine running release
+      ansible.builtin.set_fact:
+        running_version: >-
+          {{ (version_out.stdout[0]
+              | regex_search('([0-9]+\.[0-9]+\.[0-9]+)', '\1')
+              or ['unknown']) | first }}
+
+    # Unreadable version falls back to the older spelling, which is correct
+    # for everything before 10.15.1010 and therefore the safer guess on an
+    # image old enough to be getting upgraded.
+    - name: Select the correct unsafe-updates command for this release
+      ansible.builtin.set_fact:
+        unsafe_cmd: >-
+          {{ 'allow-non-failsafe-updates'
+             if (running_version != 'unknown'
+                 and running_version is version('10.15.1010', '>='))
+             else 'allow-unsafe-updates' }}
+
+    - name: "Permit non-failsafe updates for {{ unsafe_mins }} minutes"
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - command: "configure terminal"
+          - command: "{{ unsafe_cmd }} {{ unsafe_mins }}"
+            prompt:
+              - "[y/n]"
+            answer:
+              - "y"
+      register: unsafe_result
+
+
+# ── Play 3: boot to the new image (REST) ───────────────────────────────────
+
+- name: "NetForge — Boot firmware"
+  hosts: all
+  gather_facts: false
+  connection: arubanetworks.aoscx.aoscx
+  serial: 1
+
+  vars:
+    ansible_network_os: arubanetworks.aoscx.aoscx
+    ansible_user: "{{ deploy_username }}"
+    ansible_password: "{{ deploy_password }}"
+    ansible_aoscx_validate_certs: false
+    ansible_aoscx_use_proxy: false
+    ansible_acx_no_proxy: true
+    partition: "{{ firmware_partition | default('secondary') }}"
+
+  tasks:
+
+    - name: Boot to {{ partition }} partition
+      arubanetworks.aoscx.aoscx_boot_firmware:
+        partition_name: "{{ partition }}"
+      register: boot_result
+
+    # A non-failsafe update can involve several reboots, so allow well beyond
+    # a normal restart before calling it failed.
+    - name: Wait for switch to come back
+      ansible.builtin.wait_for_connection:
+        delay: 60
+        timeout: 900
+      register: reachable_after_boot
+      ignore_errors: true
+
+    - name: Build per-host result
+      ansible.builtin.set_fact:
+        firmware_result:
+          hostname: "{{ inventory_hostname }}"
+          mgmt_ip: "{{ ansible_host }}"
+          partition: "{{ partition }}"
+          image: "{{ firmware_file | basename }}"
+          uploaded: "{{ hostvars[inventory_hostname].upload_result.changed | default(false) }}"
+          unsafe_updates_allowed: "{{ allow_unsafe | default(false) | bool }}"
+          unsafe_command: "{{ hostvars[inventory_hostname].unsafe_cmd | default('') }}"
+          previous_version: "{{ hostvars[inventory_hostname].running_version | default('') }}"
+          booted: "{{ boot_result.changed | default(false) }}"
+          reachable_after_boot: "{{ reachable_after_boot is not failed }}"
+
+    - name: Write result to file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ firmware_result | to_nice_json }}"
+        dest: "{{ results_file | default('/tmp') }}/{{ inventory_hostname }}_firmware.json"
+        mode: "0644"

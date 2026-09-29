@@ -11,18 +11,18 @@
 {% if device_role | default("") == "route_reflector" %}
 router bgp {{ bgp.asn }}
     bgp router-id {{ bgp.router_id }}
-    {% for neighbor in (bgp.neighbors or []) %}
+{% for neighbor in (bgp.neighbors or []) %}
     neighbor {{ neighbor.ip }} remote-as {{ neighbor.remote_asn }}
     neighbor {{ neighbor.ip }} update-source {{ neighbor.update_source | default("loopback0") }}
-    {% endfor %}
+{% endfor %}
     address-family l2vpn evpn
-        {% for neighbor in (bgp.neighbors or []) %}
-        {% if neighbor.peer_type | default('client') == 'client' %}
+{% for neighbor in (bgp.neighbors or []) %}
+{% if neighbor.peer_type | default('client') == 'client' %}
         neighbor {{ neighbor.ip }} route-reflector-client
-        {% endif %}
+{% endif %}
         neighbor {{ neighbor.ip }} send-community extended
-        neighbor {{ neighbor.ip }} activate
-        {% endfor %}
+        neighbor {{ neighbor.ip }} activate 
+{% endfor %}
     exit-address-family
 {% endif %}
 
@@ -30,15 +30,15 @@ router bgp {{ bgp.asn }}
 {% if device_role | default("") == "route_reflector_client" %}
 router bgp {{ bgp.asn }}
     bgp router-id {{ bgp.router_id }}
-    {% for neighbor in (bgp.neighbors or []) %}
+{% for neighbor in (bgp.neighbors or []) %}
     neighbor {{ neighbor.ip }} remote-as {{ neighbor.remote_asn }}
     neighbor {{ neighbor.ip }} update-source {{ neighbor.update_source | default("loopback0") }}
-    {% endfor %}
+{% endfor %}
     address-family l2vpn evpn
-        {% for neighbor in (bgp.neighbors or []) %}
+{% for neighbor in (bgp.neighbors or []) %}
         neighbor {{ neighbor.ip }} send-community extended
         neighbor {{ neighbor.ip }} activate
-        {% endfor %}
+{% endfor %}
     exit-address-family
 {% endif %}
 

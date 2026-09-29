@@ -17,9 +17,10 @@ interface {{ loopback_interface | default("loopback1") }}
 interface vxlan 1
     source ip {{ loopback_ip }}
     no shutdown
-    {% for vni in (vxlan.vni_map or []) %}
-    vni {{ vni.vni }} vlan {{ vni.vlan }}
-    {% endfor %}
+{% for vni in (vxlan.vni_map or []) %}
+    vni {{ vni.vni }} 
+        vlan {{ vni.vlan }}
+{% endfor %}
 !
 evpn
 {% for vni in (vxlan.vni_map or []) %}

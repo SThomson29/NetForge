@@ -8,7 +8,7 @@
               radius_dynauth_servers
    Note     : Entire section suppressed if no radius_servers defined.
    ============================================================= #}
-{% set has_nac = (physical_interfaces | default([])) | selectattr('port_type', 'equalto', 'authenticated') | list | length > 0 %}
+{% set has_nac = (physical_interfaces | default([])) | map(attribute='port_type', default='') | select('equalto', 'authenticated') | list | length > 0 %}
 
 {% if radius_servers | default([]) | length > 0 %}
 radius-server key plaintext {{ radius_server_key }}

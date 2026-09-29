@@ -17,7 +17,9 @@ router bgp {{ bgp.asn }}
     {% endfor %}
     address-family l2vpn evpn
         {% for neighbor in (bgp.neighbors or []) %}
+        {% if neighbor.peer_type | default('client') == 'client' %}
         neighbor {{ neighbor.ip }} route-reflector-client
+        {% endif %}
         neighbor {{ neighbor.ip }} send-community extended
         neighbor {{ neighbor.ip }} activate
         {% endfor %}

@@ -42,8 +42,8 @@ physical_interfaces: []
 
 # ------------------------------------------------------------
 # LAG Interfaces
-# Variables: lag_interfaces[].name, .description, .admin, .mtu,
-#   .lacp_mode, .routed, .vrf, .ip_address, .ip_prefix,
+# Variables: lag_interfaces[].name, .multi_chassis, .description, 
+#   .admin, .mtu, .lacp_mode, .routed, .vrf, .ip_address, .ip_prefix,
 #   .ospf_area, .ospf_process_id, .ospf_auth_key, .access_vlan,
 #   .trunk_allowed_vlans, .trunk_native_vlan
 #   (member binding driven by physical_interfaces[].lag_member)

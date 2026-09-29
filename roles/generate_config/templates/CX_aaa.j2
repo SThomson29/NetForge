@@ -4,7 +4,8 @@
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
    Variables: radius_server_key, radius_group_name, 
-              dynamic_authorization, radius_servers[].address/.key
+              dynamic_authorization, radius_servers[].address/.key,
+              radius_dynauth_servers
    Note     : Entire section suppressed if no radius_servers defined.
    ============================================================= #}
 {% set has_nac = (physical_interfaces | default([])) | selectattr('port_type', 'equalto', 'authenticated') | list | length > 0 %}
@@ -39,8 +40,8 @@ aaa authentication port-access mac-auth
 {% if dynamic_authorization | default(false) %}
 radius dyn-authorization enable
 !
-{% for server in radius_servers %}
-radius dyn-authorization server {{ server.address }} key plaintext {{ server.key }}
+{% for server in (radius_dynauth_servers | default(radius_servers)) %}
+radius dyn-authorization server {{ server.address }} key plaintext {{ server.key | default(radius_server_key) }}
 {% endfor %}
 !
 {% endif %}

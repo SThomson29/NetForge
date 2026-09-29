@@ -3,10 +3,11 @@
    Role     : generate_config
    Device   : {{ inventory_hostname }}
    Platform : {{ platform | default("aoscx") }}
-   Variables: radius_server_key, radius_group_name,
+   Variables: radius_server_key, radius_group_name, 
               dynamic_authorization, radius_servers[].address/.key
    Note     : Entire section suppressed if no radius_servers defined.
    ============================================================= #}
+{% set has_nac = (physical_interfaces | default([])) | selectattr('port_type', 'equalto', 'authenticated') | list | length > 0 %}
 
 {% if radius_servers | default([]) | length > 0 %}
 radius-server key plaintext {{ radius_server_key }}
@@ -24,6 +25,7 @@ aaa group server radius {{ radius_group_name }}
 !
 aaa authentication login default group {{ radius_group_name }} local
 aaa accounting all-mgmt default start-stop group {{ radius_group_name }}
+{% if nac | default(has_nac) %}
 aaa accounting port-access start-stop interim 5 group {{ radius_group_name }}
 !
 aaa authentication port-access dot1x authenticator
@@ -41,5 +43,6 @@ radius dyn-authorization enable
 radius dyn-authorization server {{ server.address }} key plaintext {{ server.key }}
 {% endfor %}
 !
+{% endif %}
 {% endif %}
 {% endif %}
